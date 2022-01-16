@@ -1,20 +1,20 @@
 from flask import Blueprint, session, flash, request, redirect, url_for, render_template
-from controllers.UserController import isTokenValid, getTokenFor
+from controllers.UserController import is_token_valid, get_token_for
 
 auth = Blueprint('auth', __name__)
 
 # ----------------------------------------- #
 
-def checkLogin(token):
-    return False if not token else isTokenValid(token)
+def check_login(token):
+    return False if not token else is_token_valid(token)
 
 # ----------------------------------------- #
 
 @auth.route('/login', methods=["GET", "POST"])
 def login():
     # se token estiver válido, redirecionar logo, não vale a pena fazer login
-    if checkLogin(session["token"]):
-        return redirect(url_for("views/votar.html"))
+    if check_login(session["token"]):
+        return redirect(url_for("views.votar"))
 
     if request.method == "POST":
         error = None
@@ -25,7 +25,7 @@ def login():
             error = "Email é obrigatório!"
         else:
             # buscar token de login ao controlador, caso o email seja válido
-            token = getTokenFor(email)
+            token = get_token_for(email)
             if not token:
                 # user não existe
                 error = "Email inválido!"
@@ -33,8 +33,8 @@ def login():
                 # fazer login
                 session.clear()
                 session["token"] = token
-                return redirect(url_for("views/votar.html"))
+                return redirect(url_for("views.votar"))
 
-        flash(error)
+        flash(error, 'error')
 
-    return render_template("auth/login.html")
+    return render_template("login.html")

@@ -1,6 +1,6 @@
 from flask import Flask
 
-def startServer():
+def start_server():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'mama que é de uva'
 

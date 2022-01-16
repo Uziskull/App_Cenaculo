@@ -1,12 +1,12 @@
-from website import startServer
-from controllers.UserController import startUserService
-from controllers.VoteController import startPropostaService
+from website import start_server
+from controllers.UserController import start_service as start_user_service
+from controllers.VoteController import start_service as start_proposta_service
 import threading
 
 
-app = startServer()
-startUserService()
-startPropostaService()
+app = start_server()
+start_user_service()
+start_proposta_service()
 
 def main():
     # criar thread para lidar com servidor
