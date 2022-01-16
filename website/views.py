@@ -1,5 +1,5 @@
 from flask import Blueprint, Response, request, session, flash, render_template, redirect, url_for
-from controllers.VoteController import get_current_poll, get_all_polls, voteWithToken, alreadyVoted, VoteError
+from controllers.VoteController import get_current_poll, get_all_polls, vote_with_token, already_voted, VoteError
 from .auth import check_login
 
 views = Blueprint('views', __name__)
@@ -34,11 +34,11 @@ def votar():
         # se não houver voto, avisar com erro
         if not vote:
             error = "Voto é obrigatório!"
-        elif alreadyVoted(token, current_poll.id):
+        elif already_voted(token, current_poll):
             error = "Já votaste nesta proposta!"
         else:
             try:
-                voteWithToken(token, vote, current_poll.id)
+                vote_with_token(token, vote, current_poll)
                 flash("Votaste com sucesso!", 'message')
             except VoteError as e:
                 # voteWithToken devolve erros dependendo de varias coisas, meter em mensagem de erro
