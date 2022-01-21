@@ -13,8 +13,11 @@ def check_login(token):
 @auth.route('/login', methods=["GET", "POST"])
 def login():
     # se token estiver válido, redirecionar logo, não vale a pena fazer login
-    if check_login(session["token"]):
-        return redirect(url_for("views.votar"))
+    try:
+        if check_login(session["token"]):
+            return redirect(url_for("views.votar"))
+    except KeyError:
+        pass
 
     if request.method == "POST":
         error = None
@@ -37,4 +40,4 @@ def login():
 
         flash(error, 'error')
 
-    return render_template("login.html")
+    return render_template("auth/login.html")
