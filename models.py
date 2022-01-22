@@ -3,11 +3,15 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+#############################################
+## Classes
+#############################################
+
 class User(db.Model):
     token = db.Column(db.String(), primary_key=True)
     email = db.Column(db.String(), unique=True, nullable=False)
 
-    poll = db.relationship("Poll", secondary="uservote")
+    ##poll = db.relationship("Poll", secondary="uservote")
 
     def __init__(self, email):
         self.email = email
@@ -21,7 +25,10 @@ class Poll(db.Model):
     description = db.Column(db.String(), unique=True, nullable=False)
     order = db.Column(db.Integer, unique=True, autoincrement=True)
 
-    user = db.relationship("User", secondary="uservote")
+    ##user = db.relationship("User", secondary="uservote")
+
+    # # criar referencia inversa na tabela User chamada "polls"
+    # users = db.relationship(User, secondary='Vote', backref="polls")
 
     def __init__(self, description):
         self.id = str(uuid4())
@@ -33,11 +40,11 @@ class Poll(db.Model):
 class Vote(db.Model):
     user_token = db.Column(db.String(), db.ForeignKey('user.token'), primary_key=True)
     poll_id = db.Column(db.String(), db.ForeignKey('poll.id'), primary_key=True)
-    vote_option = db.Column(db.Integer, db.CheckConstraint('vote_option >= 0 AND vote_option < 3'),
+    vote_option = db.Column(db.Integer, db.CheckConstraint('vote_option >= 0 AND vote_option <= 2'),
         autoincrement=False, nullable=False)
 
-    # user = db.relationship('user', backref=db.backref('user_uservote'))
-    # vote = db.relationship('vote', backref=db.backref('vote_uservote'))
+    user = db.relationship(User, backref=db.backref('votes'))
+    poll = db.relationship(Poll, backref=db.backref('users'))
 
     def __init__(self, user_token, poll_id, vote_option):
         self.user_token = user_token
@@ -63,4 +70,3 @@ class ActivePoll(db.Model):
 
     def __repr__(self) -> str:
         return f"Active vote: {self.poll_id}"
-

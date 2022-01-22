@@ -40,10 +40,8 @@ class PollOrderingError(PollError):
 # Variáveis
 # ----------------------------------------- #
 
+# inseridas globalmente, para a pagina de voto saber que votos existem
 VOTOS = ["SIM", "NAO", "ABSTER"]
-
-
-
 
 # ----------------------------------------- #
 # WebApp
@@ -92,6 +90,29 @@ def get_current_poll():
 
 def get_all_polls():
     return Poll.query.order_by(Poll.order).all()
+
+def get_all_polls_and_results():
+    # este gatafunho devolve todas as propostas e o seu número de votos positivos/negativos/neutros
+    # ordem de votos é a estabelecida em 'VOTOS': sim, não, abster
+    return db.Query([
+            Poll,
+            db.func.count(db.case(
+                [((Vote.vote_option == 0), Vote.user_token)],
+                else_=db.literal_column("NULL")
+            )).label(VOTOS[0].lower()),
+            db.func.count(db.case(
+                [((Vote.vote_option == 1), Vote.user_token)],
+                else_=db.literal_column("NULL")
+            )).label(VOTOS[1].lower()),
+            db.func.count(db.case(
+                [((Vote.vote_option == 2), Vote.user_token)],
+                else_=db.literal_column("NULL")
+            )).label(VOTOS[2].lower())],
+            session=db.session) \
+        .join(Vote.poll) \
+        .group_by(Poll) \
+        .order_by(Poll.order) \
+        .all()
 
 # ----------------------------------------- #
 # GUI

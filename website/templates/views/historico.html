@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Propostas{% endblock %}
+
+{% block content %}
+
+    {% if poll_results is none or poll_results|length == 0 %}
+        <h1>De momento, não existem propostas criadas.</h1>
+    {% else %}
+        <dl>
+            {% for poll in poll_results %}
+            <dt>{{poll.order}}. {{poll.description}}</dt>
+            <dd>A Favor: {{poll.sim}} | Contra: {{poll.nao}} | Abstenções: {{poll.abster}}</dd>
+            {% endfor %}
+        </dl>
+    {% endif %}
+
+{% endblock %}

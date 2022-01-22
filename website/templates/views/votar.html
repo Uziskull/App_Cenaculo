@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Votar{% endblock %}
+
+{% block content %}
+
+    {% if poll is none %}
+        <h1>Não existe proposta com votação aberta neste momento.</h1>
+    {% else %}
+        <h1>Proposta {{poll.order}}:</h1>
+        <p>{{poll.description}}</p>
+        <form action="votar" method="post">
+            <input type="submit" name="{{OPCOES_VOTO[0]}}" value="A Favor">
+            <input type="submit" name="{{OPCOES_VOTO[2]}}" value="Abster">
+            <input type="submit" name="{{OPCOES_VOTO[1]}}" value="Contra">
+        </form>
+    {% endif %}
+
+{% endblock %}
