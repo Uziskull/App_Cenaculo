@@ -2,12 +2,19 @@ from typing import Sequence
 from models import User, db
 
 # ----------------------------------------- #
-# WebApp
+# Erros
 # ----------------------------------------- #
 
-# def start_service():
-#     # TODO: iniciar listas de utilizadores, etc etc
-#     pass
+class UserError(Exception):
+    pass
+
+class UserNotFoundError(UserError):
+    def __init__(self):
+        super().__init__("Esse utilizador não existe!")
+
+# ----------------------------------------- #
+# WebApp
+# ----------------------------------------- #
 
 def is_token_valid(token: str):
     u = User.query.get(token)
@@ -23,7 +30,18 @@ def get_token_for(email: str):
 # GUI
 # ----------------------------------------- #
 
-def insert_multiple_users(user_emails: Sequence[str]):
+def insert_multiple_users(user_emails: Sequence[str]) -> None:
     for email in user_emails:
         db.session.add(User(email))
+    db.session.commit()
+
+def get_all_users() -> None:
+    return User.query.all()
+
+def delete_user(user_token: str) -> None:
+    user = User.query.get(user_token)
+    if user is None:
+        raise UserNotFoundError()
+    
+    db.session.delete(user)
     db.session.commit()

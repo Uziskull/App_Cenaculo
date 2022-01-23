@@ -9,14 +9,14 @@ class PollError(Exception):
 
 class DuplicateVoteError(PollError):
     def __init__(self):
-        super().__init__("Já votaste nesta proposta!")
+        super().__init__("Já votaste nessa proposta!")
 
 class VotingClosedError(PollError):
     def __init__(self, has_ended):
         str_end = "ainda não começou!"
         if has_ended:
             str_end = "já acabou!"
-        super().__init__("A votação para esta proposta " + str_end)
+        super().__init__("A votação para essa proposta " + str_end)
 
 class VotingPeriodError(PollError):
     def __init__(self):
@@ -24,7 +24,7 @@ class VotingPeriodError(PollError):
 
 class PollNotFoundError(PollError):
     def __init__(self):
-        super().__init__("Esta proposta não existe!")
+        super().__init__("Essa proposta não existe!")
 
 class BadVoteError(PollError):
     def __init__(self, vote):
@@ -46,10 +46,6 @@ VOTOS = ["SIM", "NAO", "ABSTER"]
 # ----------------------------------------- #
 # WebApp
 # ----------------------------------------- #
-
-# def start_service():
-#     # TODO: iniciar listas de propostas, etc etc
-#     pass
 
 def vote_with_token(token: str, vote: str, poll_id: str):
     # verificar se voto é válido
@@ -118,12 +114,15 @@ def get_all_polls_and_results():
 # GUI
 # ----------------------------------------- #
 
-def create_poll(description: str):
+def create_poll(description: str) -> Poll:
     # adicionar proposta no final da lista
-    db.session.add(Poll(description))
+    new_poll = Poll(description)
+    db.session.add(new_poll)
+    db.session.flush()
     db.session.commit()
+    return new_poll
 
-def order_poll(poll_id: str, new_order: int):
+def order_poll(poll_id: str, new_order: int) -> None:
     polls = get_all_polls()
 
     # verificar se ordem está dentro dos limites
@@ -153,11 +152,19 @@ def order_poll(poll_id: str, new_order: int):
         db.session.merge(p)
     db.session.commit()
 
-def edit_vote(poll_id: str, new_description: str):
+def edit_poll(poll_id: str, new_description: str) -> None:
     poll = Poll.query.get(poll_id)
     if poll is None:
         raise PollNotFoundError()
     
     poll.description = new_description
     db.session.merge(poll)
+    db.session.commit()
+
+def delete_poll(poll_id: str) -> None:
+    poll = Poll.query.get(poll_id)
+    if poll is None:
+        raise PollNotFoundError()
+    
+    db.session.delete(poll)
     db.session.commit()
