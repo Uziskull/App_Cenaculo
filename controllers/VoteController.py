@@ -36,6 +36,14 @@ class PollOrderingError(PollError):
     def __init__(self):
         super().__init__("Essa ordem de proposta é inválida!")
 
+class PollAlreadyOpenError(PollError):
+    def __init__(self):
+        super().__init__("Já existe uma proposta aberta!")
+
+class PollNotOpenError(PollError):
+    def __init__(self):
+        super().__init__("Essa proposta não está aberta!")
+
 # ----------------------------------------- #
 # Variáveis
 # ----------------------------------------- #
@@ -56,8 +64,8 @@ def vote_with_token(token: str, vote: str, poll_id: str):
         raise BadVoteError(vote)
 
     # verificar se existem propostas abertas
-    current_vote = get_current_poll()
-    if current_vote is None:
+    current_poll = get_current_poll()
+    if current_poll is None:
         raise VotingPeriodError()
 
     # verificar se proposta existe
@@ -66,8 +74,8 @@ def vote_with_token(token: str, vote: str, poll_id: str):
         raise PollNotFoundError()
 
     # verificar se proposta está aberta a votos
-    if current_vote.vote_id == poll_id:
-        has_previous_votes = possible_poll.vote.count() > 0
+    if current_poll.id != poll_id:
+        has_previous_votes = len(possible_poll.votes) > 0
         raise VotingClosedError(has_previous_votes)
 
     # verificar se utilizador já votou
@@ -82,7 +90,10 @@ def already_voted(token: str, poll_id: str):
     return uv is not None
 
 def get_current_poll():
-    return ActivePoll.query.first()
+    active_poll = ActivePoll.query.first()
+    if active_poll is None:
+        return None
+    return Poll.query.get(active_poll.poll_id)
 
 def get_all_polls():
     return Poll.query.order_by(Poll.order).all()
@@ -91,7 +102,9 @@ def get_all_polls_and_results():
     # este gatafunho devolve todas as propostas e o seu número de votos positivos/negativos/neutros
     # ordem de votos é a estabelecida em 'VOTOS': sim, não, abster
     return db.Query([
-            Poll,
+            Poll.id,
+            Poll.description,
+            Poll.order,
             db.func.count(db.case(
                 [((Vote.vote_option == 0), Vote.user_token)],
                 else_=db.literal_column("NULL")
@@ -105,8 +118,9 @@ def get_all_polls_and_results():
                 else_=db.literal_column("NULL")
             )).label(VOTOS[2].lower())],
             session=db.session) \
-        .join(Vote.poll) \
-        .group_by(Poll) \
+        .select_from(Poll) \
+        .join(Vote, isouter=True) \
+        .group_by(Poll.id, Poll.description, Poll.order) \
         .order_by(Poll.order) \
         .all()
 
@@ -114,9 +128,12 @@ def get_all_polls_and_results():
 # GUI
 # ----------------------------------------- #
 
-def create_poll(description: str) -> Poll:
+def count_polls() -> int:
+    return db.session.query(Poll).count()
+
+def create_poll(order: int, description: str) -> Poll:
     # adicionar proposta no final da lista
-    new_poll = Poll(description)
+    new_poll = Poll(order, description)
     db.session.add(new_poll)
     db.session.flush()
     db.session.commit()
@@ -167,4 +184,29 @@ def delete_poll(poll_id: str) -> None:
         raise PollNotFoundError()
     
     db.session.delete(poll)
+    db.session.commit()
+
+def open_poll(poll_id: str) -> None:
+    active_poll = ActivePoll.query.first()
+    if active_poll is not None:
+        raise PollAlreadyOpenError()
+    
+    poll = Poll.query.get(poll_id)
+    if poll is None:
+        raise PollNotFoundError()
+
+    active_poll = ActivePoll(poll_id)
+    db.session.add(active_poll)
+    db.session.commit()
+
+
+def close_poll(poll_id: str) -> None:
+    active_poll = ActivePoll.query.first()
+    if active_poll is None:
+        raise VotingPeriodError()
+    
+    if active_poll.poll_id != poll_id:
+        raise PollNotOpenError()
+    
+    db.session.delete(active_poll)
     db.session.commit()

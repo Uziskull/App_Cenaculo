@@ -17,14 +17,21 @@ def home():
 @views.route('/votar',methods=["GET", "POST"])
 def votar():
     current_poll = None
+    user_voted = False
     try:
         # se token estiver inválido, redirecionar para login
+        token = None
         try:
             token = session["token"]
             if not check_login(token):
                 return redirect(url_for("auth.login"))
         except KeyError:
             return redirect(url_for("auth.login"))
+        
+        # obter a proposta atual
+        current_poll = get_current_poll()
+        if current_poll is not None:
+            user_voted = already_voted(token, current_poll.id)
 
         if request.method == "POST":
             error = None
@@ -52,14 +59,11 @@ def votar():
             if error:
                 flash(error, 'error')
         
-        # obter a proposta atual
-        current_poll = get_current_poll()
-        
     except OperationalError:
         # base de dados deu o prego
         flash("Ocorreu um erro ao ligar à base de dados. Não devia acontecer, oops!", 'error')
     
-    return render_template("views/votar.html", poll=current_poll)
+    return render_template("views/votar.html", poll=current_poll, already_voted=user_voted)
 
 @views.route('/historico',methods=["GET"])
 def historico():

@@ -20,7 +20,7 @@ def start_server():
             sys.exit(1)
     
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = 'mama que é de uva'
+    app.config['SECRET_KEY'] = 'mama que eh de uva'
 
     db.init_app(app)
 

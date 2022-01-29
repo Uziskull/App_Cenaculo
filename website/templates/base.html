@@ -9,6 +9,9 @@
         {% endblock %}
     </head>
     <body>
+        <div id="header">
+            <a href="/votar">Votação Atual</a> | <a href="/historico">Todas as Propostas</a>
+        </div>
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <ul class=flashes>
