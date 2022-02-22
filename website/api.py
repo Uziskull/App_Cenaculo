@@ -7,6 +7,11 @@ from psycopg2.errors import UniqueViolation
 api = Blueprint('api', __name__)
 
 @api.route('/propostas', methods=["GET"])
+def api_ver_propostas():
+    result = VoteController.get_all_polls()
+    return jsonify(as_dict(result)), 200
+
+@api.route('/propostas/votos', methods=["GET"])
 def api_ver_votos():
     result = VoteController.get_all_polls_and_results()
     return jsonify(as_dict(result)), 200
@@ -15,13 +20,20 @@ def api_ver_votos():
     #         "id": result[i].poll.id,
     #         "description": result[i].poll.description,
     #         "order": i+1,
-    #         "votos": {
-    #             "sim": result[i].sim,
-    #             "nao": result[i].nao,
-    #             "abster": result[i].abster
-    #         }
+    #         ##"votos": {
+    #         "sim": result[i].sim,
+    #         "nao": result[i].nao,
+    #         "abster": result[i].abster
+    #         ##}
     #     }
     #     for i in range(len(result))], 200
+
+@api.route('/propostas/ativa', methods=["GET"])
+def api_ver_proposta_ativa():
+    poll = VoteController.get_current_poll()
+    if poll is None:
+        return "", 204
+    return jsonify(as_dict(poll)), 200
 
 @api.route('/propostas', methods=["POST"])
 def api_criar_proposta():
@@ -32,6 +44,14 @@ def api_criar_proposta():
         return jsonify(as_dict(new_poll)), 201
     except UniqueViolation as e:
         return "Já existe uma proposta com essa descrição!", 404
+    except Exception as e:
+        return str(e), 404
+
+@api.route('/propostas/<poll_id>/votos', methods=["GET"])
+def api_ver_votos_proposta(poll_id):
+    try:
+        votes = VoteController.get_votes_for(poll_id)
+        return jsonify(as_dict(votes)), 200
     except Exception as e:
         return str(e), 404
 

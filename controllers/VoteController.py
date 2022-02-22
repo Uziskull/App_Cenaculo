@@ -139,6 +139,25 @@ def create_poll(order: int, description: str) -> Poll:
     db.session.commit()
     return new_poll
 
+def get_votes_for(poll_id: str):
+    return db.Query([
+            db.func.count(db.case(
+                [((Vote.vote_option == 0), Vote.user_token)],
+                else_=db.literal_column("NULL")
+            )).label(VOTOS[0].lower()),
+            db.func.count(db.case(
+                [((Vote.vote_option == 1), Vote.user_token)],
+                else_=db.literal_column("NULL")
+            )).label(VOTOS[1].lower()),
+            db.func.count(db.case(
+                [((Vote.vote_option == 2), Vote.user_token)],
+                else_=db.literal_column("NULL")
+            )).label(VOTOS[2].lower())],
+            session=db.session) \
+        .select_from(Vote) \
+        .filter(Vote.poll_id == poll_id) \
+        .one()
+
 def order_poll(poll_id: str, new_order: int) -> None:
     polls = get_all_polls()
 
@@ -163,9 +182,9 @@ def order_poll(poll_id: str, new_order: int) -> None:
         polls_to_change = polls[new_order-1:poll_to_change.order-1]
     # 2. alterar ordem de proposta a alterar, e dar shift de tudo para +1 ou -1, conforme
     poll_to_change.order = new_order
-    map(lambda p: p.order + (1 if poll_going_up else -1), polls)
+    map(lambda p: p.order + (1 if poll_going_up else -1), polls_to_change)
     # 3. update all
-    for p in polls:
+    for p in polls_to_change:
         db.session.merge(p)
     db.session.commit()
 
@@ -174,6 +193,9 @@ def edit_poll(poll_id: str, new_description: str) -> None:
     if poll is None:
         raise PollNotFoundError()
     
+    if poll.description == new_description:
+        return
+
     poll.description = new_description
     db.session.merge(poll)
     db.session.commit()
@@ -182,8 +204,15 @@ def delete_poll(poll_id: str) -> None:
     poll = Poll.query.get(poll_id)
     if poll is None:
         raise PollNotFoundError()
-    
     db.session.delete(poll)
+
+    polls = get_all_polls()
+    if poll.order < len(polls):
+        polls_to_change = polls[poll.order-1:]
+        for p in polls_to_change:
+            p.order =- 1
+            db.session.merge(p)
+
     db.session.commit()
 
 def open_poll(poll_id: str) -> None:

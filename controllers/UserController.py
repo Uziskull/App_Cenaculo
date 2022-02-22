@@ -31,9 +31,10 @@ def get_token_for(email: str):
 # ----------------------------------------- #
 
 def insert_multiple_users(user_emails: Sequence[str]) -> None:
-    for email in user_emails:
-        db.session.add(User(email))
+    new_users = [User(email) for email in user_emails]
+    db.session.add_all(new_users)
     db.session.commit()
+    return new_users
 
 def get_all_users() -> None:
     return User.query.all()

@@ -1,3 +1,6 @@
 flask
 gunicorn
 Flask-SQLAlchemy
+
+matplotlib
+requests

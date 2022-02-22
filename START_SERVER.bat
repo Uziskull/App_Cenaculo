@@ -1,0 +1,1 @@
+venv\Scripts\activate.bat & python main.py DATABASE_URL=postgresql://postgres:admin@localhost:5432/propostas & pause
