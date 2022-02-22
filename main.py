@@ -28,4 +28,4 @@ models.db.session.commit()
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=7777)
+    app.run(debug=True, port=7777, use_reloader=False)
