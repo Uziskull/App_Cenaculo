@@ -3,9 +3,9 @@
 {% block title %}Votar{% endblock %}
 
 {% block content %}
-
+    <h1>Votar</h1>
     {% if poll is none %}
-        <h1>Não existe proposta com votação aberta neste momento.</h1>
+        <h2>Não existe proposta com votação aberta neste momento.</h2>
     {% else %}
         {% set isDisabled = 'disabled' if already_voted else '' %}
         <h1>Proposta {{poll.order}}:</h1>
