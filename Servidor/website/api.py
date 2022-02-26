@@ -1,5 +1,5 @@
-from flask import Blueprint, request, current_app, jsonify
-import sqlalchemy
+from flask import Blueprint, request, current_app#, jsonify
+from json import dumps as jsonify
 from controllers import VoteController, UserController
 from models import as_dict
 from psycopg2.errors import UniqueViolation
@@ -38,7 +38,7 @@ def api_ver_proposta_ativa():
 @api.route('/propostas', methods=["POST"])
 def api_criar_proposta():
     try:
-        body = request.get_json()
+        body = request.get_json(force=True)
         count = VoteController.count_polls()
         new_poll = VoteController.create_poll(count + 1, body["description"])
         return jsonify(as_dict(new_poll)), 201
@@ -58,7 +58,7 @@ def api_ver_votos_proposta(poll_id):
 @api.route('/propostas/<poll_id>', methods=["PATCH"])
 def api_alterar_proposta(poll_id):
     try:
-        body = request.get_json()
+        body = request.get_json(force=True)
         if "description" in body:
             VoteController.edit_poll(poll_id, body["description"])
         
@@ -102,7 +102,7 @@ def api_ver_utilizadores():
 @api.route('/utilizadores', methods=["POST"])
 def api_adicionar_utilizadores():
     try:
-        body = request.get_json()
+        body = request.get_json(force=True)
         if not isinstance(body, list) \
             or not all(isinstance(obj, str) for obj in body):
             return "Não é lista de strings", 400
