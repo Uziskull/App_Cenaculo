@@ -6,7 +6,7 @@ class DB:
     url = None
     headers = None
 
-    def __init__(self, url="localhost:5000"):
+    def __init__(self, url="http://localhost:5000/api"):
         self.url = url
         self.headers = {'Informacao-Dramatica': 'mama que eh de uva'}
 
