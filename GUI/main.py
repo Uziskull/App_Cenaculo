@@ -6,10 +6,22 @@ import matplotlib, numpy, sys
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
+from modelos import Proposta
+import servidor
+
+db = servidor.DB()
+lista_propostas = []
+
 # this is a function to get the selected list box value
 def onClick():
-	if len(entry.get(1.0, 'end-1c')) > 0:
-		listBoxOn.insert(END, entry.get(1.0, "end-1c"))
+	desc = entry.get(1.0, 'end-1c')
+	if len(desc) > 0:
+		# try:
+		prop = db.criar_proposta(desc)
+		lista_propostas.append(prop)
+		listBoxOn.insert(END, desc)
+		# except Exception as e:
+		# 	print(e)
 		entry.delete(1.0, "end-1c")
 
 def onListboxSelect(e):
@@ -42,6 +54,11 @@ close_button.place(relx=0.77, rely=0.8, relwidth=0.11, relheight=0.05)
 listBoxOn=Listbox(root, bg='#FFFFFF', font=('arial', 12, 'normal'), width=0, height=0)
 listBoxOn.place(relx=0.05, rely=0.45, relwidth=0.4, relheight=0.5)
 listBoxOn.bind("<<ListboxSelect>>", onListboxSelect)
+
+def update_list():
+	lista_propostas = db.ver_todas_propostas_e_votos()
+	for proposta in lista_propostas:
+		listBoxOn.insert(END, proposta)
 
 proposal = Label(text = "Seleciona uma proposta")
 proposal.place(relx=0.6, rely=0.15, relwidth=0.3, relheight=0.05)
