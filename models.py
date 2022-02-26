@@ -12,15 +12,17 @@ db = SQLAlchemy()
 class User(db.Model):
     token = db.Column(db.String(), primary_key=True)
     email = db.Column(db.String(), unique=True, nullable=False)
+    otp = db.Column(db.String(), nullable=True)
 
     ##poll = db.relationship("Poll", secondary="uservote")
 
     def __init__(self, email):
         self.email = email
         self.token = str(uuid4())
+        self.otp = None
 
     def __repr__(self) -> str:
-        return f"{self.token}:{self.email}"
+        return f"{self.token}:{self.email}:{self.otp}"
 
 class Poll(db.Model):
     id = db.Column(db.String(), primary_key=True)

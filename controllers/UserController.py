@@ -16,15 +16,25 @@ class UserNotFoundError(UserError):
 # WebApp
 # ----------------------------------------- #
 
-def is_token_valid(token: str):
-    u = User.query.get(token)
-    return u is not None
-
 def get_token_for(email: str):
     u = User.query.filter_by(email=email).first()
     if u is None:
         return None
     return u.token
+
+def is_login_valid(token: str, otp: str):
+    u = User.query.get(token)
+    if u is None:
+        return False
+    return u.otp == otp
+
+def store_login(token: str, otp: str):
+    u = User.query.get(token)
+    if u is None:
+        raise UserNotFoundError()
+    u.otp = otp
+    db.session.merge(u)
+    db.session.commit()
 
 # ----------------------------------------- #
 # GUI
