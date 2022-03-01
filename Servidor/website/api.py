@@ -24,7 +24,8 @@ def api_ver_votos():
     #         "sim": result[i].sim,
     #         "nao": result[i].nao,
     #         "abster": result[i].abster
-    #         ##}
+    #         ##},
+    #         "status": result[i].status
     #     }
     #     for i in range(len(result))], 200
 
@@ -89,7 +90,8 @@ def api_abrir_votos(poll_id):
 def api_fechar_votos(poll_id):
     try:
         VoteController.close_poll(poll_id)
-        return "", 200
+        poll_status = VoteController.count_votes(poll_id)
+        return jsonify({"status": poll_status}), 200
     except Exception as e:
         return str(e), 404
 
