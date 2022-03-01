@@ -36,6 +36,14 @@ def store_login(token: str, otp: str):
     db.session.merge(u)
     db.session.commit()
 
+def log_out(token: str, otp: str):
+    u = User.query.filter_by(token=token, otp=otp).first()
+    if u is None:
+        raise UserNotFoundError()
+    u.otp = None
+    db.session.merge(u)
+    db.session.commit()
+
 # ----------------------------------------- #
 # GUI
 # ----------------------------------------- #
