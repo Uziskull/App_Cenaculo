@@ -3,16 +3,84 @@
 {% block title %}Propostas{% endblock %}
 
 {% block content %}
-
-    {% if poll_results is none or poll_results|length == 0 %}
-        <h1>De momento, não existem propostas criadas.</h1>
-    {% else %}
-        <dl>
-            {% for poll in poll_results %}
-            <dt>{{poll.order}}. {{poll.description}}</dt>
-            <dd>A Favor: {{poll.sim}} | Contra: {{poll.nao}} | Abstenções: {{poll.abster}}</dd>
-            {% endfor %}
-        </dl>
-    {% endif %}
-
+    <div class="container-fluid bg-light mt-4 pt-3 pb-3">
+        <h1 class="font_default" style="font-weight:bold;">Propostas</h1>
+    </div>
+    <div class="container-fluid bg-light pt-2 pb-2">
+        {% if poll_results is none or poll_results|length == 0 %}
+        <h2 class="font_default" style="font-size: 18px;">
+            De momento, não existem propostas criadas.
+        </h2>
+        {% else %}
+        {% set voted_polls = poll_results|rejectattr('status','none')|list %}
+        <div id="accordion" class="font_default">
+            <div class="card">
+                <div class="card-header d-grid p-0">
+                    <a class="btn btn-block btn-dark btn_votadas collapsed" data-bs-target="#votadas" data-bs-toggle="collapse"></a>
+                </div>
+                <div id="votadas" class="collapse" data-bs-parent="#accordion">
+                    <div class="card-body pt-2 pb-2">
+                        {% if voted_polls|length == 0 %}
+                        <h2 class="font_default" style="font-size: 18px;">
+                            Não existem propostas para votar.
+                        </h2>
+                        {% endif %}
+                        {% for poll in voted_polls %}
+                        <div class="card m-2">
+                            <div class="card-body">
+                                <h4 class="card-title">Proposta {{poll.order}}</h4>
+                                <p class="card-text">{{poll.description}}</p>
+                                <div class="clearfix">
+                                    <span class="float-start">
+                                        <span><img src="{{ url_for('static',filename='thumb.svg') }}" alt="+" style="width:16px;"></span>{{poll.sim}} 
+                                        <span><img src="{{ url_for('static',filename='thumb.svg') }}" alt="-" style="width:16px;transform: rotateY(180deg);"></span>{{poll.nao}} 
+                                        <span><img src="{{ url_for('static',filename='meh.svg') }}" alt="~" style="width:16px;"></span>{{poll.abster}}
+                                    </span>
+                                    <span class="float-end">
+                                        {% if poll.status %}
+                                        <p class="text-success">Aprovada</p>
+                                        {% else %}
+                                        <p class="text-danger">Reprovada</p>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% set unvoted_polls = poll_results|selectattr('status','none')|list %}
+            <div class="card">
+                <div class="card-header d-grid p-0">
+                    <a class="btn btn-block btn-dark btn_por_votar" data-bs-target="#por-votar" data-bs-toggle="collapse"></a>
+                </div>
+                <div id="por-votar" class="collapse show" data-bs-parent="#accordion">
+                    <div class="card-body">
+                        {% if unvoted_polls|length == 0 %}
+                        <h2 class="font_default" style="font-size: 18px;">
+                            Não existem propostas para serem votadas.
+                        </h2>
+                        {% endif %}
+                        {% for poll in unvoted_polls %}
+                        <div class="card m-2">
+                            <div class="card-body">
+                                <h4 class="card-title">Proposta {{poll.order}}</h4>
+                                <p class="card-text">{{poll.description}}</p>
+                                <div class="clearfix">
+                                    <span class="float-start">
+                                        <span><img src="{{ url_for('static',filename='thumb.svg') }}" alt="+" class="img-responsive"></span>{{poll.sim}} 
+                                        <span><img src="{{ url_for('static',filename='thumb.svg') }}" alt="-" class="img-responsive" style="transform: rotateY(180deg);"></span>{{poll.nao}} 
+                                        <span><img src="{{ url_for('static',filename='meh.svg') }}" alt="~" class="img-responsive"></span>{{poll.abster}}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 {% endblock %}

@@ -3,19 +3,30 @@
 {% block title %}Votar{% endblock %}
 
 {% block content %}
-    <h1>Votar</h1>
+<div class="container-fluid bg-light mt-4 pt-3 pb-3">
+    <h1 class="font_default" style="font-weight:bold;">Votar</h1>
+</div>
+<div class="container-fluid bg-light pt-2 pb-2">
     {% if poll is none %}
-        <h2>Não existe proposta com votação aberta neste momento.</h2>
+    <h2 class="font_default" style="font-size: 18px;">
+        Não existe proposta com votação aberta neste momento.
+    </h2>
     {% else %}
-        {% set isDisabled = 'disabled' if already_voted else '' %}
-        <h1>Proposta {{poll.order}}:</h1>
-        <p>{{poll.description}}</p>
-        <form action="votar" method="post">
+    {% set isDisabled = 'disabled' if already_voted else '' %}
+    <h2 class="font_default" style="font-weight:bold; font-size: 18px;">
+        Proposta {{poll.order}}:
+    </h2>
+    <h2 class="font_default" style="font-size: 18px;">
+        {{poll.description}}
+    </h2>
+    <form class="pt-4 pb-4" action="votar" method="post">
+        <div class="row">
             <input type="hidden" name="proposta" value="{{poll.id}}">
-            <input type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[0]}}" value="A Favor">
-            <input type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[2]}}" value="Abster">
-            <input type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[1]}}" value="Contra">
-        </form>
+            <input class="col ms-2 me-2 btn btn-block btn-success" type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[0]}}" value="A Favor">
+            <input class="col ms-2 me-2 btn btn-block btn-secondary" type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[2]}}" value="Abster">
+            <input class="col ms-2 me-2 btn btn-block btn-danger" type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[1]}}" value="Contra">
+        </div>
+    </form>
     {% endif %}
-
+</div>
 {% endblock %}

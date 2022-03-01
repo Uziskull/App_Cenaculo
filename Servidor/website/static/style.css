@@ -1,0 +1,35 @@
+@font-face {
+    font-family: Avenir;
+    src: url("avenir-lt-std-35-light.otf");
+}
+
+.font_default {
+    font-family: Avenir,sans-serif;
+    line-height: 1.67em;
+    text-align: center;
+}
+
+.bg_default {
+    background-color: rgb(196, 36, 44);
+}
+
+.login_input {
+    border: 1px solid rgb(255, 64, 64);
+    background-color: rgba(255,255,255,0.1);
+}
+.login_button {
+    background-color: white;
+}
+
+.btn_votadas.collapsed:before {
+    content: '► Votadas' /* ao contrário, por estar aberto primeiro*/
+}
+.btn_votadas:before {
+    content: '▼ Votadas'
+}
+.btn_por_votar.collapsed:before {
+    content: '► Por Votar'
+}
+.btn_por_votar:before {
+    content: '▼ Por Votar'
+}

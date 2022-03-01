@@ -3,11 +3,22 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-
-<form action="login" method="post">
-    <label for="email">Email:</label>
-    <input type="text" id="email" name="email">
-    <input type="submit" value="Entrar">
-</form>
-
+    <div class="container-fluid bg-light">
+        <div class="mt-4 pt-5 pb-5 container-fluid">
+            <h1 class="font_default" style="font-size: 18px; font-weight:bold">
+                Bem-vindx à Votação da Carta do XII Ciclo de Cenáculo do Clã Impisa!
+            </h1>
+        </div>
+    </div>
+    <div class="container-fluid pt-3 pb-3 bg_default">
+        <h1 class="font_default pt-2 pb-2 text-light" style="font-size: 18px;">
+            PARA ENTRAR INSERE O TEU EMAIL ABAIXO!
+        </h1>
+        <form action="login" method="post">
+            <div class="d-grid gap-3 ">
+                <input class="login_input p-3 btn-block" type="text" id="email" name="email" placeholder="Insere o teu email">
+                <input class="login_button pt-3 pb-3 btn btn-light btn-block" type="submit" value="Entrar">
+            </div>
+        </form>
+    </div>
 {% endblock %}

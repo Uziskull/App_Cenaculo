@@ -52,10 +52,10 @@ def login():
                         error = "Não foi possível fazer login. Por favor tente novamente!"
                         session.clear()
 
-            flash(error, 'error')
+            flash(error, 'danger')
         
     except OperationalError:
         # base de dados deu o prego
-        flash("Ocorreu um erro ao ligar à base de dados. Não devia acontecer, oops!", 'error')
+        flash("Ocorreu um erro ao ligar à base de dados. Não devia acontecer, oops!", 'danger')
 
     return render_template("auth/login.html")

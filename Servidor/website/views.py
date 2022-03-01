@@ -32,7 +32,7 @@ def votar():
         current_poll = get_current_poll()
         if current_poll is not None:
             user_voted = already_voted(token, current_poll.id)
-
+        
         if request.method == "POST":
             error = None
 
@@ -51,17 +51,18 @@ def votar():
             else:
                 try:
                     vote_with_token(token, vote, poll_id)
-                    flash("Votaste com sucesso!", 'message')
+                    user_voted = True
+                    flash("Votaste com sucesso!", 'success')
                 except PollError as e:
                     # voteWithToken devolve erros dependendo de varias coisas, meter em mensagem de erro
                     error = str(e)
 
             if error:
-                flash(error, 'error')
+                flash(error, 'danger')
         
     except OperationalError:
         # base de dados deu o prego
-        flash("Ocorreu um erro ao ligar à base de dados. Não devia acontecer, oops!", 'error')
+        flash("Ocorreu um erro ao ligar à base de dados. Não devia acontecer, oops!", 'danger')
     
     return render_template("views/votar.html", poll=current_poll, already_voted=user_voted)
 
@@ -82,6 +83,6 @@ def historico():
         
     except OperationalError:
         # base de dados deu o prego
-        flash("Ocorreu um erro ao ligar à base de dados. Não devia acontecer, oops!", 'error')
+        flash("Ocorreu um erro ao ligar à base de dados. Não devia acontecer, oops!", 'danger')
 
     return render_template("views/historico.html", poll_results=all_poll_results)

@@ -5,23 +5,39 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="with=device-width, initial-scale=1" />
         <link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap.min.css') }}">
+        <script src="{{ url_for('static',filename='bootstrap.bundle.min.js') }}"></script>
         <title>{% block title %}{% endblock %} - Votos Cenáculo</title>
         {% endblock %}
     </head>
     <body>
-        <div id="header">
-            <a href="/votar">Votação Atual</a> | <a href="/historico">Todas as Propostas</a>
-        </div>
-        {% with messages = get_flashed_messages() %}
+        <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                  <img src="{{ url_for('static',filename='logo.png') }}" alt="Avatar Logo" style="width:40px;" class="rounded-pill"> 
+                </a>
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link{{ ' disabled' if request.path == '/login' else (' active' if request.path == '/votar' else '') }}" href="/votar">Votação Atual</a>
+                    <a class="nav-item nav-link{{ ' disabled' if request.path == '/login' else (' active' if request.path == '/historico' else '') }}" href="/historico">Todas as Propostas</a>
+                </div>
+            </div>
+        </nav>
+        {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <ul class=flashes>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
+                {% for cat, msg in messages %}
+                    <div class="alert alert-{{ cat }}">
+                        {% if cat == 'danger' %}
+                        <strong>Erro:</strong> {{ msg }}
+                        {% else %}
+                        {{ msg }}
+                        {% endif %}
+                    </div>
                 {% endfor %}
-                </ul>
             {% endif %}
         {% endwith %}
-        <div id="content">{% block content %}{% endblock %}</div>
+        <div class="container-fluid">
+            {% block content %}{% endblock %}
+        </div>
         <!-- <div id="footer">
             {% block footer %}
             &copy; Copyright 2022 by <a href="http://domain.invalid/">you</a>.
