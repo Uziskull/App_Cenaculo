@@ -1,8 +1,13 @@
+body {
+    /* para compensar navbars */
+    padding-top: 50px;
+    padding-bottom: 40px;
+}
+
 @font-face {
     font-family: Avenir;
     src: url("avenir-lt-std-35-light.otf");
 }
-
 .font_default {
     font-family: Avenir,sans-serif;
     line-height: 1.67em;
