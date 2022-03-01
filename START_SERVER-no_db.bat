@@ -1,1 +1,1 @@
-venv\Scripts\activate.bat & cd Servidor & python main.py & pause
+venv\Scripts\activate.bat & cd Servidor & python main.py debug=False & pause

@@ -1,5 +1,6 @@
 from website import start_server
 from flask import render_template
+import sys
 
 app = start_server()
 
@@ -26,6 +27,15 @@ import models
 models.db.create_all()
 models.db.session.commit()
 
-
+DEBUG_FLAG_OFF = "debug=false"
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True, use_reloader=False)
+    debug = True
+    for arg in sys.argv:
+        if arg.lower() == DEBUG_FLAG_OFF:
+            debug = False
+            break
+    
+    if debug:
+        app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=True)
+    else:
+        app.run(host="0.0.0.0", port=7777, debug=False, use_reloader=False)
