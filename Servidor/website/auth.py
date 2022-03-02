@@ -1,6 +1,6 @@
 from uuid import uuid4
 from flask import Blueprint, session, flash, request, redirect, url_for, render_template
-from controllers.UserController import get_token_for, store_login, is_login_valid, log_out
+from controllers.UserController import get_token_for, store_login, is_login_valid, log_out, UserAlreadyLoggedIn
 from sqlalchemy.exc import OperationalError
 
 auth = Blueprint('auth', __name__)
@@ -48,6 +48,8 @@ def login():
                         session.clear()
                         session["token"] = f"{token}:{random_otp}"
                         return redirect(url_for("views.votar"))
+                    except UserAlreadyLoggedIn as e:
+                        error = str(e)
                     except:
                         error = "Não foi possível fazer login. Por favor tente novamente!"
                         session.clear()
@@ -65,9 +67,8 @@ def logout():
     # se token estiver válido, fazer logout; de resto, redirecionar a login
     try:
         token = session["token"]
-        if check_login(token):
-            token, otp = token.split(":")
-            log_out(token, otp)
-            return redirect(url_for("auth.login"))
+        token, otp = token.split(":")
+        log_out(token, otp)
+        return redirect(url_for("auth.login"))
     except Exception:
         return redirect(url_for("auth.login"))

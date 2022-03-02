@@ -33,7 +33,7 @@
                                 <div class="clearfix">
                                     <span class="float-start">
                                         <span><img src="{{ url_for('static',filename='thumb.svg') }}" alt="+" style="width:16px;"></span>{{poll.sim}} 
-                                        <span><img src="{{ url_for('static',filename='thumb.svg') }}" alt="-" style="width:16px;transform: rotateY(180deg);"></span>{{poll.nao}} 
+                                        <span><img src="{{ url_for('static',filename='thumb.svg') }}" alt="-" style="width:16px;transform: rotateX(180deg);"></span>{{poll.nao}} 
                                         <span><img src="{{ url_for('static',filename='meh.svg') }}" alt="~" style="width:16px;"></span>{{poll.abster}}
                                     </span>
                                     <span class="float-end">
@@ -70,7 +70,7 @@
                                 <div class="clearfix">
                                     <span class="float-start">
                                         <span><img src="{{ url_for('static',filename='thumb.svg') }}" alt="+" class="img-responsive"></span>{{poll.sim}} 
-                                        <span><img src="{{ url_for('static',filename='thumb.svg') }}" alt="-" class="img-responsive" style="transform: rotateY(180deg);"></span>{{poll.nao}} 
+                                        <span><img src="{{ url_for('static',filename='thumb.svg') }}" alt="-" class="img-responsive" style="transform: rotateX(180deg);"></span>{{poll.nao}} 
                                         <span><img src="{{ url_for('static',filename='meh.svg') }}" alt="~" class="img-responsive"></span>{{poll.abster}}
                                     </span>
                                 </div>

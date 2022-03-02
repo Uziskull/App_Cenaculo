@@ -12,6 +12,10 @@ class UserNotFoundError(UserError):
     def __init__(self):
         super().__init__("Esse utilizador não existe!")
 
+class UserAlreadyLoggedIn(UserError):
+    def __init__(self):
+        super().__init__("Alguém já entrou com este email. Se fores o dono deste email, avisa-nos!")
+
 # ----------------------------------------- #
 # WebApp
 # ----------------------------------------- #
@@ -32,6 +36,8 @@ def store_login(token: str, otp: str):
     u = User.query.get(token)
     if u is None:
         raise UserNotFoundError()
+    if u.otp is not None:
+        raise UserAlreadyLoggedIn()
     u.otp = otp
     db.session.merge(u)
     db.session.commit()
