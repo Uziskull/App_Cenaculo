@@ -23,7 +23,9 @@
         <div class="row">
             <input type="hidden" name="proposta" value="{{poll.id}}">
             <input class="col ms-2 me-2 btn btn-block btn-success" type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[0]}}" value="A Favor">
+            {% if poll.status == ESTADOS_PROPOSTA[2] %}
             <input class="col ms-2 me-2 btn btn-block btn-secondary" type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[2]}}" value="Abster">
+            {% endif %}
             <input class="col ms-2 me-2 btn btn-block btn-danger" type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[1]}}" value="Contra">
         </div>
     </form>

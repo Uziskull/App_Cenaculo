@@ -1,13 +1,14 @@
 import os, sys
 from flask import Flask
 from models import db
-from controllers.VoteController import VOTOS
+from controllers.VoteController import VOTOS, ESTADOS
 
 def start_server():
     app = Flask(__name__)
 
-    # inserir opções de voto como variável global
+    # inserir opções de voto e estados de proposta como variáveis globais
     app.jinja_env.globals["OPCOES_VOTO"] = VOTOS
+    app.jinja_env.globals["ESTADOS_PROPOSTA"] = ESTADOS
 
     try:
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
