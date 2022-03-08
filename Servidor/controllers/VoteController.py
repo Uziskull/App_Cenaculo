@@ -30,6 +30,10 @@ class BadVoteError(PollError):
     def __init__(self, vote):
         super().__init__(f"Tipo de voto inválido: {vote}")
 
+class SecondRoundAbstentionError(PollError):
+    def __init__(self):
+        super().__init__("Esta proposta está em segunda volta, abstenção de voto não é permitido!")
+
 # -----------------------------------
 
 class PollOrderingError(PollError):
@@ -50,6 +54,8 @@ class PollNotOpenError(PollError):
 
 # inseridas globalmente, para a pagina de voto saber que votos existem
 VOTOS = ["SIM", "NAO", "ABSTER"]
+
+ESTADOS = ["APROVADO", "REPROVADO", "2VOLTA"]
 
 # ----------------------------------------- #
 # WebApp
@@ -73,9 +79,13 @@ def vote_with_token(token: str, vote: str, poll_id: str):
     if possible_poll is None:
         raise PollNotFoundError()
 
+    # verificar se proposta permite abstenções
+    if possible_poll.status == ESTADOS[2] and vote_num == 2:
+        raise SecondRoundAbstentionError()
+
     # verificar se proposta está aberta a votos
     if current_poll.id != poll_id:
-        raise VotingClosedError(possible_poll.status != None)
+        raise VotingClosedError(possible_poll.status not in [None, ESTADOS[2]])
         # has_previous_votes = len(possible_poll.votes) > 0
         # raise VotingClosedError(has_previous_votes)
 
@@ -226,7 +236,7 @@ def open_poll(poll_id: str) -> None:
     if poll is None:
         raise PollNotFoundError()
 
-    if poll.status is not None:
+    if poll.status not in [None, ESTADOS[2]]:
         raise VotingClosedError(True)
 
     active_poll = ActivePoll(poll_id)
@@ -250,16 +260,24 @@ def count_votes(poll_id: str) -> bool:
     if poll is None:
         raise PollNotFoundError()
 
-    if poll.status is not None:
+    if poll.status not in [None, ESTADOS[2]]:
         raise VotingClosedError(True)
 
     votes = get_votes_for(poll_id)
     for i in range(len(VOTOS)):
         if votes[i] > 0:
             # se já alguém votou
+
+            # técnica de votação: 50+1, caso não seja aprovada/reprovada vai a segunda volta sem abstenção
             final_votes = {VOTOS[i]:votes[i] for i in range(len(VOTOS))}
-            poll_status = False if final_votes["ABSTER"] > final_votes["SIM"] + final_votes["NAO"] else final_votes["SIM"] > final_votes["NAO"]
+            poll_status = ESTADOS[2]
+            if final_votes["SIM"] > final_votes["NAO"] +  final_votes["ABSTER"]:
+                poll_status = ESTADOS[0]
+            elif final_votes["NAO"] > final_votes["SIM"] +  final_votes["ABSTER"]:
+                poll_status = ESTADOS[1]
             
+            # caso de empate em segunda volta: proposta reprovada
+
             poll.status = poll_status
             db.session.merge(poll)
             db.session.commit()

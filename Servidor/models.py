@@ -28,7 +28,7 @@ class Poll(db.Model):
     id = db.Column(db.String(), primary_key=True)
     description = db.Column(db.String(), unique=True, nullable=False)
     order = db.Column(db.Integer, unique=True, nullable=False)
-    status = db.Column(db.Boolean, unique=False, nullable=True)
+    status = db.Column(db.Integer, unique=False, nullable=True)
 
     ##user = db.relationship("User", secondary="uservote")
 
@@ -42,8 +42,7 @@ class Poll(db.Model):
         self.status = None
 
     def __repr__(self) -> str:
-        status_str = "Aprovada" if self.status else "Reprovada"
-        return f"{self.id}:{self.order}:{self.description}:{status_str}"
+        return f"{self.id}:{self.order}:{self.description}:{self.status}"
 
 class Vote(db.Model):
     user_token = db.Column(db.String(), db.ForeignKey('user.token'), primary_key=True)
