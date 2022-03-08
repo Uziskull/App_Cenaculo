@@ -78,7 +78,7 @@ class DB:
         if r.status_code != 200:
             raise Exception(r.text)
     
-    def fechar_votos_proposta(self, proposta: Proposta) -> bool:
+    def fechar_votos_proposta(self, proposta: Proposta) -> int:
         """Fecha a altura de votação de uma proposta, calcula os votos
         da mesma e retorna o estado final da votação.
         Retorna erro se a proposta não estiver aberta para votação."""

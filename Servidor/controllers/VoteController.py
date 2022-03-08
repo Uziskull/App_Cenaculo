@@ -80,12 +80,12 @@ def vote_with_token(token: str, vote: str, poll_id: str):
         raise PollNotFoundError()
 
     # verificar se proposta permite abstenções
-    if possible_poll.status == ESTADOS[2] and vote_num == 2:
+    if possible_poll.status == ESTADOS.index("2VOLTA") and vote_num == VOTOS.index("ABSTER"):
         raise SecondRoundAbstentionError()
 
     # verificar se proposta está aberta a votos
     if current_poll.id != poll_id:
-        raise VotingClosedError(possible_poll.status not in [None, ESTADOS[2]])
+        raise VotingClosedError(possible_poll.status not in [None, ESTADOS.index("2VOLTA")])
         # has_previous_votes = len(possible_poll.votes) > 0
         # raise VotingClosedError(has_previous_votes)
 
@@ -236,7 +236,7 @@ def open_poll(poll_id: str) -> None:
     if poll is None:
         raise PollNotFoundError()
 
-    if poll.status not in [None, ESTADOS[2]]:
+    if poll.status not in [None, ESTADOS.index("2VOLTA")]:
         raise VotingClosedError(True)
 
     active_poll = ActivePoll(poll_id)
@@ -260,7 +260,7 @@ def count_votes(poll_id: str) -> bool:
     if poll is None:
         raise PollNotFoundError()
 
-    if poll.status not in [None, ESTADOS[2]]:
+    if poll.status not in [None, ESTADOS.index("2VOLTA")]:
         raise VotingClosedError(True)
 
     votes = get_votes_for(poll_id)
@@ -270,11 +270,11 @@ def count_votes(poll_id: str) -> bool:
 
             # técnica de votação: 50+1, caso não seja aprovada/reprovada vai a segunda volta sem abstenção
             final_votes = {VOTOS[i]:votes[i] for i in range(len(VOTOS))}
-            poll_status = ESTADOS[2]
+            poll_status = ESTADOS.index("2VOLTA")
             if final_votes["SIM"] > final_votes["NAO"] +  final_votes["ABSTER"]:
-                poll_status = ESTADOS[0]
+                poll_status = ESTADOS.index("APROVADO")
             elif final_votes["NAO"] > final_votes["SIM"] +  final_votes["ABSTER"]:
-                poll_status = ESTADOS[1]
+                poll_status = ESTADOS.index("REPROVADO")
             
             # caso de empate em segunda volta: proposta reprovada
 
