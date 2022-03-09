@@ -47,7 +47,7 @@ class DB:
     def atualizar_votos_proposta(self, proposta: Proposta) -> Proposta:
         """Atualiza os votos desta proposta para os votos atuais.
         Retorna a mesma proposta, com os votos atualizados."""
-        r = requests.get(self.url + '/propostas/' + proposta["id"] + '/votos',
+        r = requests.get(self.url + '/propostas/' + proposta.id + '/votos',
             headers=self.headers)
         if r.status_code != 200:
             raise Exception(r.text)
@@ -58,14 +58,14 @@ class DB:
     def alterar_proposta(self, proposta: Proposta) -> None:
         """Altera a ordem e/ou descrição da proposta no servidor,
         caso tenham sido alteradas."""
-        r = requests.patch(self.url + '/propostas/' + proposta["id"],
+        r = requests.patch(self.url + '/propostas/' + proposta.id,
             headers=self.headers, data=json.dumps(proposta))
         if r.status_code != 200:
             raise Exception(r.text)
     
     def apagar_proposta(self, proposta: Proposta) -> None:
         """Apaga uma proposta da lista."""
-        r = requests.delete(self.url + '/propostas/' + proposta["id"],
+        r = requests.delete(self.url + '/propostas/' + proposta.id,
             headers=self.headers)
         if r.status_code != 204:
             raise Exception(r.text)
@@ -73,7 +73,7 @@ class DB:
     def abrir_votos_proposta(self, proposta: Proposta) -> None:
         """Abre uma proposta a votos, permitindo utilizadores votarem nela.
         Retorna erro se a proposta já estiver aberta a votos."""
-        r = requests.post(self.url + '/propostas/' + proposta["id"] + '/abrir',
+        r = requests.post(self.url + '/propostas/' + proposta.id + '/abrir',
             headers=self.headers)
         if r.status_code != 200:
             raise Exception(r.text)
@@ -82,7 +82,7 @@ class DB:
         """Fecha a altura de votação de uma proposta, calcula os votos
         da mesma e retorna o estado final da votação.
         Retorna erro se a proposta não estiver aberta para votação."""
-        r = requests.post(self.url + '/propostas/' + proposta["id"] + '/fechar',
+        r = requests.post(self.url + '/propostas/' + proposta.id + '/fechar',
             headers=self.headers)
         if r.status_code != 200:
             raise Exception(r.text)
@@ -107,7 +107,7 @@ class DB:
     
     def remover_utilizador(self, utilizador: Utilizador) -> None:
         """Remove um utilizador que já exista."""
-        r = requests.delete(self.url + '/utilizadores/' + utilizador["id"],
+        r = requests.delete(self.url + '/utilizadores/' + utilizador.id,
             headers=self.headers)
         if r.status_code != 204:
             raise Exception(r.text)
