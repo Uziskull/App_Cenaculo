@@ -216,17 +216,15 @@ def delete_poll(poll_id: str) -> None:
     poll = Poll.query.get(poll_id)
     if poll is None:
         raise PollNotFoundError()
-
-    polls_to_change = []
-    polls = get_all_polls()
-    if poll.order < len(polls):
-        polls_to_change = polls[poll.order-1:]
-        for p in polls_to_change:
-            p.order =- 1
-
+    deleted_order = poll.order
     db.session.delete(poll)
-    for p in polls_to_change:
-        db.session.merge(p)
+
+    polls = get_all_polls()
+    if deleted_order < len(polls):
+        polls_to_change = polls[deleted_order - 1:]
+        for p in polls_to_change:
+            p.order -= 1
+            db.session.merge(p)
 
     db.session.commit()
 
