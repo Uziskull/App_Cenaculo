@@ -48,6 +48,10 @@ class PollNotOpenError(PollError):
     def __init__(self):
         super().__init__("Essa proposta não está aberta!")
 
+class PollDeleteOpenError(PollError):
+    def __init__(self):
+        super().__init__("Não é permitido apagar uma proposta aberta!")
+
 # ----------------------------------------- #
 # Variáveis
 # ----------------------------------------- #
@@ -216,6 +220,11 @@ def delete_poll(poll_id: str) -> None:
     poll = Poll.query.get(poll_id)
     if poll is None:
         raise PollNotFoundError()
+
+    active_poll = ActivePoll.query.first()
+    if active_poll is not None and active_poll.poll_id == poll_id:
+        raise PollDeleteOpenError()
+
     deleted_order = poll.order
     db.session.delete(poll)
 
