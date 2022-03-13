@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import List, Sequence
 from models import User, db
 
 # ----------------------------------------- #
@@ -54,13 +54,13 @@ def log_out(token: str, otp: str):
 # GUI
 # ----------------------------------------- #
 
-def insert_multiple_users(user_emails: Sequence[str]) -> None:
+def insert_multiple_users(user_emails: Sequence[str]) -> List[User]:
     new_users = [User(email) for email in user_emails]
     db.session.add_all(new_users)
     db.session.commit()
     return new_users
 
-def get_all_users() -> None:
+def get_all_users() -> List[User]:
     return User.query.all()
 
 def delete_user(user_token: str) -> None:

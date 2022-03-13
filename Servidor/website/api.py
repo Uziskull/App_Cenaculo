@@ -109,8 +109,7 @@ def api_adicionar_utilizadores():
             or not all(isinstance(obj, str) for obj in body):
             return "Não é lista de strings", 400
             
-        UserController.insert_multiple_users(body)
-        return "", 200
+        return jsonify(as_dict(UserController.insert_multiple_users(body))), 200
     except Exception as e:
         return str(e), 404
 
