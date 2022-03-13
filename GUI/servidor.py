@@ -59,7 +59,7 @@ class DB:
         """Altera a ordem e/ou descrição da proposta no servidor,
         caso tenham sido alteradas."""
         r = requests.patch(self.url + '/propostas/' + proposta.id,
-            headers=self.headers, data=json.dumps(proposta))
+            headers=self.headers, data=json.dumps(proposta, default=vars))
         if r.status_code != 200:
             raise Exception(r.text)
     
@@ -107,7 +107,7 @@ class DB:
     
     def remover_utilizador(self, utilizador: Utilizador) -> None:
         """Remove um utilizador que já exista."""
-        r = requests.delete(self.url + '/utilizadores/' + utilizador.id,
+        r = requests.delete(self.url + '/utilizadores/' + utilizador.token,
             headers=self.headers)
         if r.status_code != 204:
             raise Exception(r.text)
