@@ -28,6 +28,8 @@ def votar():
         except KeyError:
             return redirect(url_for("auth.login"))
         
+        # PRG: obter resultado de post, se existir
+
         # obter a proposta atual
         current_poll = get_current_poll()
         if current_poll is not None:
@@ -51,7 +53,6 @@ def votar():
             else:
                 try:
                     vote_with_token(token, vote, poll_id)
-                    user_voted = True
                     flash("Votaste com sucesso!", 'success')
                 except PollError as e:
                     # voteWithToken devolve erros dependendo de varias coisas, meter em mensagem de erro
@@ -59,6 +60,8 @@ def votar():
 
             if error:
                 flash(error, 'danger')
+            
+            return redirect(url_for("views.votar"))
         
     except OperationalError:
         # base de dados deu o prego

@@ -248,6 +248,10 @@ def open_poll(poll_id: str) -> None:
 
     if poll.status not in [None, ESTADOS.index("2VOLTA")]:
         raise VotingClosedError(True)
+    elif poll.status == ESTADOS.index("2VOLTA"):
+        # se for 2ª volta, limpar votos existentes
+        Vote.query.filter(Vote.poll_id == poll_id).delete()
+        db.session.commit()
 
     active_poll = ActivePoll(poll_id)
     db.session.add(active_poll)

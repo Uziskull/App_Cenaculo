@@ -1,5 +1,5 @@
 ESTADOS_PROPOSTA = ["Aprovada", "Reprovada", "2ª Volta"]
-ESTADOS_PROPOSTA_CORES = ["#00ff00", "#ff0000", "#aaaaaa"]
+ESTADOS_PROPOSTA_CORES = ["#00ff00", "#ff0000", "#555555"]
 
 class Proposta:
     id = None

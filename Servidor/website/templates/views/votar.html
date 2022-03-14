@@ -14,7 +14,7 @@
     {% else %}
     {% set isDisabled = 'disabled' if already_voted else '' %}
     <h2 class="font_default" style="font-weight:bold; font-size: 18px;">
-        Proposta {{poll.order}}:
+        Proposta {{poll.order}}: {{"(Segunda Volta)" if poll.status == 2 else ""}}
     </h2>
     <h2 class="font_default" style="font-size: 18px;">
         {{poll.description}}

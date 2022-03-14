@@ -18,7 +18,9 @@ db = DB()
 
 lista_propostas = db.ver_todas_propostas_e_votos()
 lista_utilizadores = db.ver_utilizadores()
-aberta = None
+aberta = db.ver_proposta_ativa()
+if aberta is not None:
+	aberta = lista_propostas.index(aberta)
 
 def get_current_poll():
     index_list = listBoxOn.curselection()
@@ -27,15 +29,19 @@ def get_current_poll():
         return lista_propostas[index]
 
 def getListboxValue(event):
+	global active
 	cs = listBoxOn.curselection()
 	if len(cs) == 1:
 		item = cs[0]
+
 		proposal.config(text="Proposta {}:\n{}".format(str(item+1), "\n".join(textwrap.wrap(listBoxOn.get(item), 50))))
 		#messagebox.showinfo("Descrição da Proposta", listBoxOn.get(item))
 
 		ax.clear()
 		ax.bar(ind, lista_propostas[item].votos, width)
 		canvas.draw()
+
+		vote_count.config(text="Votação {}".format("Aberta" if active == item else "Fechada"))
 		
 		poll_status = lista_propostas[item].status
 		if poll_status is None:
@@ -232,10 +238,14 @@ rects1 = ax.bar(ind, data, width)
 
 canvas = FigureCanvasTkAgg(f, master=root)
 #canvas.draw()
-canvas.get_tk_widget().place(relx=0.55, rely=0.25, relwidth=0.4, relheight=0.5)
+canvas_widget = canvas.get_tk_widget()
+canvas_widget.place(relx=0.55, rely=0.25, relwidth=0.4, relheight=0.5)
+
+vote_count = Label(text='Votação Fechada', bg='#F0F8FF', width=100, font=('arial', 12, 'normal'))
+vote_count.place(relx=0.55, rely=0.25, relwidth=0.1, relheight=0.05)
 
 vote_status_label = Label(text='', bg='#F0F8FF', width=100, font=('arial', 12, 'normal'))
-vote_status_label.place(relx=0.55, rely=0.20, relwidth=0.1, relheight=0.05)
+vote_status_label.place(relx=0.85, rely=0.25, relwidth=0.1, relheight=0.05)
 
 def atualizar_votos():
 	global aberta
@@ -243,18 +253,20 @@ def atualizar_votos():
 	timer_votos.daemon = True
 	timer_votos.start()
 
-	if aberta is not None:
+	cs = listBoxOn.curselection()
+	if aberta is not None and len(cs) > 0 and cs[0] == aberta:
 		try:
 			prop = lista_propostas[aberta]
 			prop = db.atualizar_votos_proposta(prop)
 			lista_propostas[aberta] = prop
-			ax.clear()
-			ax.bar(ind, prop.votos, width)
-			canvas.draw()
+			# ax.clear()
+			# ax.bar(ind, prop.votos, width)
+			# canvas.draw()
+			vote_count.config(text="Votação Aberta\nVotos: {}".format(sum(list(prop.votos))))
 		except Exception as e:
 			print("Erro ao atualizar votos: {}".format(e))
 	
-#atualizar_votos()
+atualizar_votos()
 
 root.config(menu = menu)
 root.mainloop()
