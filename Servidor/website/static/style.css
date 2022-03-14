@@ -12,6 +12,7 @@ body {
     font-family: Avenir,sans-serif;
     line-height: 1.67em;
     text-align: center;
+    word-wrap: break-word;
 }
 
 .bg_default {

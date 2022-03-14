@@ -1,1 +1,1 @@
-venv\Scripts\activate.bat & cd GUI & python main.py & pause
+venv\Scripts\activate.bat & cd GUI & python main.py

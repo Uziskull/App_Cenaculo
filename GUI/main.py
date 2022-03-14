@@ -8,9 +8,12 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from tkinter import messagebox
 from servidor import DB
-from modelos import Proposta, Utilizador
+from modelos import Proposta, Utilizador, ESTADOS_PROPOSTA, ESTADOS_PROPOSTA_CORES
+import textwrap
+import threading
 
-db = DB("http://192.168.43.72:7777/api")
+#db = DB("http://192.168.43.72:7777/api")
+db = DB()
 
 
 lista_propostas = db.ver_todas_propostas_e_votos()
@@ -27,11 +30,19 @@ def getListboxValue(event):
 	cs = listBoxOn.curselection()
 	if len(cs) == 1:
 		item = cs[0]
-		proposal.config(text="Proposta " + str(item+1))
-		messagebox.showinfo("Descrição da Proposta", listBoxOn.get(item))
+		proposal.config(text="Proposta {}:\n{}".format(str(item+1), "\n".join(textwrap.wrap(listBoxOn.get(item), 50))))
+		#messagebox.showinfo("Descrição da Proposta", listBoxOn.get(item))
+
 		ax.clear()
-		ax.bar(ind, lista_propostas[item].votos , width)
+		ax.bar(ind, lista_propostas[item].votos, width)
 		canvas.draw()
+		
+		poll_status = lista_propostas[item].status
+		if poll_status is None:
+			vote_status_label.config(text='')
+		else:
+			vote_status_label.config(text="Estado: {}".format(ESTADOS_PROPOSTA[poll_status]), fg=ESTADOS_PROPOSTA_CORES[poll_status])
+
 def onClick():
 	if len(entry.get(1.0, 'end-1c')) > 0:
 		nova_proposta = db.criar_proposta(entry.get(1.0, "end-1c"))
@@ -41,21 +52,27 @@ def onClick():
 		
 
 def open():
+	global aberta
 	try: 
 		current_poll = get_current_poll()
 		db.abrir_votos_proposta(current_poll)
 		aberta = lista_propostas.index(current_poll)
-	except AttributeError: 
+	except AttributeError:
 		messagebox.showerror('Erro', 'Não há nenhuma proposta selecionada!')
 	except Exception as e:
 		messagebox.showerror('Erro', e)
 
 def close():
-	try: 
+	global aberta
+	try:
 		current_poll = get_current_poll()
-		db.fechar_votos_proposta(current_poll)
+		index = lista_propostas.index(current_poll)
+		updated_poll = db.fechar_votos_proposta(current_poll)
+		lista_propostas[index] = updated_poll
 		aberta = None
-		
+
+		# dar print a tudo outra vez
+		getListboxValue(None)
 	except AttributeError: 
 		messagebox.showerror('Erro', 'Não há nenhuma proposta selecionada!')
 	except Exception as e:
@@ -145,7 +162,7 @@ def delete_user(listadeusers):
 		lista_utilizadores.pop(i)
 		listadeusers.delete(i)
 	except IndexError: 
-		messagebox.showerror('Erro', 'Não há nenhuma proposta selecionada!')
+		messagebox.showerror('Erro', 'Não há nenhum utilizador selecionado!')
 	except Exception as e:
 		messagebox.showerror('Erro', e)
 
@@ -194,7 +211,7 @@ edit_button = Button(bg='RED', fg='WHITE', height=3, text='Editar', command=lamb
 edit_button.place(relx=0.265, rely=0.875, relwidth=0.07, relheight=0.05)
 
 proposal = Label(text='', bg='#F0F8FF', width=100, font=('arial', 12, 'normal'))
-proposal.place(relx=0.6, rely=0.2, relwidth=0.3, relheight=0.05)
+proposal.place(relx=0.5, rely=0.025, relwidth=0.5, relheight=0.15)
 
 menu = Menu()
 ver = Menu(menu, tearoff= 0)
@@ -214,8 +231,30 @@ width = 0.5
 rects1 = ax.bar(ind, data, width)
 
 canvas = FigureCanvasTkAgg(f, master=root)
-canvas.draw()
+#canvas.draw()
 canvas.get_tk_widget().place(relx=0.55, rely=0.25, relwidth=0.4, relheight=0.5)
+
+vote_status_label = Label(text='', bg='#F0F8FF', width=100, font=('arial', 12, 'normal'))
+vote_status_label.place(relx=0.55, rely=0.20, relwidth=0.1, relheight=0.05)
+
+def atualizar_votos():
+	global aberta
+	timer_votos = threading.Timer(1.0, atualizar_votos)
+	timer_votos.daemon = True
+	timer_votos.start()
+
+	if aberta is not None:
+		try:
+			prop = lista_propostas[aberta]
+			prop = db.atualizar_votos_proposta(prop)
+			lista_propostas[aberta] = prop
+			ax.clear()
+			ax.bar(ind, prop.votos, width)
+			canvas.draw()
+		except Exception as e:
+			print("Erro ao atualizar votos: {}".format(e))
+	
+#atualizar_votos()
 
 root.config(menu = menu)
 root.mainloop()

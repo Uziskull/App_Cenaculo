@@ -7,7 +7,7 @@ class DB:
     url = None
     headers = None
 
-    def __init__(self, url="http://localhost:5000/api"):
+    def __init__(self, url="http://localhost:342/api"):
         # TODO: testar url, abre socket basicamente
         self.url = url
         self.headers = {'Informacao-Dramatica': 'mama que eh de uva'}
@@ -42,7 +42,7 @@ class DB:
             raise Exception(r.text)
         p = r.json()
         print(p)
-        return Proposta(p["id"], p["description"], p["order"], None, None)
+        return Proposta(p["id"], p["description"], p["order"], (0,0,0), None)
     
     def atualizar_votos_proposta(self, proposta: Proposta) -> Proposta:
         """Atualiza os votos desta proposta para os votos atuais.
@@ -78,7 +78,7 @@ class DB:
         if r.status_code != 200:
             raise Exception(r.text)
     
-    def fechar_votos_proposta(self, proposta: Proposta) -> int:
+    def fechar_votos_proposta(self, proposta: Proposta) -> Proposta:
         """Fecha a altura de votação de uma proposta, calcula os votos
         da mesma e retorna o estado final da votação.
         Retorna erro se a proposta não estiver aberta para votação."""
@@ -87,7 +87,9 @@ class DB:
         if r.status_code != 200:
             raise Exception(r.text)
         j = r.json()
-        return j["status"]
+        proposta.status = j["status"]
+        proposta = self.atualizar_votos_proposta(proposta)
+        return proposta
     
     # -----------------------------------
     

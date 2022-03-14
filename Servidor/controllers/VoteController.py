@@ -265,7 +265,7 @@ def close_poll(poll_id: str) -> None:
     db.session.delete(active_poll)
     db.session.commit()
 
-def count_votes(poll_id: str) -> bool:
+def count_votes(poll_id: str) -> Poll:
     poll = Poll.query.get(poll_id)
     if poll is None:
         raise PollNotFoundError()
@@ -286,13 +286,15 @@ def count_votes(poll_id: str) -> bool:
             elif final_votes["NAO"] > final_votes["SIM"] +  final_votes["ABSTER"]:
                 poll_status = ESTADOS.index("REPROVADO")
             
-            # caso de empate em segunda volta: proposta reprovada
+            # se status já for 2ª volta, é caso de empate em segunda volta: proposta reprovada
+            if poll.status == poll_status:
+                poll_status = ESTADOS.index("REPROVADO")
 
             poll.status = poll_status
             db.session.merge(poll)
             db.session.commit()
 
-            return poll_status
+            return poll
     
     # não existem votos na proposta
     return None
