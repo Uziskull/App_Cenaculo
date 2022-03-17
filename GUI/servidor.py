@@ -87,8 +87,9 @@ class DB:
         if r.status_code != 200:
             raise Exception(r.text)
         j = r.json()
-        proposta.status = j["status"]
-        proposta = self.atualizar_votos_proposta(proposta)
+        if j is not None:
+            proposta.status = j["status"]
+            proposta = self.atualizar_votos_proposta(proposta)
         return proposta
     
     # -----------------------------------
