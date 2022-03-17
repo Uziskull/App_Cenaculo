@@ -262,7 +262,7 @@ def atualizar_votos():
 			# ax.clear()
 			# ax.bar(ind, prop.votos, width)
 			# canvas.draw()
-			vote_count.config(text="Votação Aberta\nVotos: {}".format(sum(list(prop.votos))))
+			vote_count.config(text="Votação Aberta\nVotos: {}/{}".format(sum(list(prop.votos)), len(lista_utilizadores)))
 		except Exception as e:
 			print("Erro ao atualizar votos: {}".format(e))
 	
