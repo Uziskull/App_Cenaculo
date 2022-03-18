@@ -252,6 +252,7 @@ def janela_nova(listbox_cursel):
 
 	plt_fig = Figure(figsize=(3,2), dpi=150, facecolor= '#F0F8FF')
 	plt_fig_ax = plt_fig.add_subplot(111)
+	plt_fig_ax.set_ylim([0, max(len(lista_utilizadores), 5)])
 
 	plt_fig_ind = ('Favor', 'Contra', 'Abstenções') 
 	plt_fig_width = 0.5
@@ -313,7 +314,6 @@ def janela_nova(listbox_cursel):
 	view_proposal_details()
 
 	def on_close():
-		thread_status = False
 		detalhes_proposta.destroy()
 
 	detalhes_proposta.protocol('WM_DELETE_WINDOW', on_close)
