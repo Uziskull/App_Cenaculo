@@ -195,8 +195,8 @@ def janela_nova(listbox_cursel):
 	detalhes_proposta = Toplevel()
 	detalhes_proposta.grab_set()
 	detalhes_proposta.title('Proposta {}'.format(id + 1))
+	detalhes_proposta.geometry('1000x700')
 	detalhes_proposta.configure(background='#F0F8FF')
-	detalhes_proposta.geometry('500x500')
 
 	def view_proposal_details():
 		proposta = lista_propostas[id]
@@ -250,7 +250,7 @@ def janela_nova(listbox_cursel):
 		except Exception as e:
 			messagebox.showerror('Erro', e)
 
-	plt_fig = Figure(figsize=(3,2), dpi=100, facecolor= '#F0F8FF')
+	plt_fig = Figure(figsize=(3,2), dpi=150, facecolor= '#F0F8FF')
 	plt_fig_ax = plt_fig.add_subplot(111)
 
 	plt_fig_ind = ('Favor', 'Contra', 'Abstenções') 
@@ -259,22 +259,22 @@ def janela_nova(listbox_cursel):
 
 	canvas = FigureCanvasTkAgg(plt_fig, master=detalhes_proposta)
 	canvas_widget = canvas.get_tk_widget()
-	canvas_widget.place(relx=0.05, rely=0.25, relwidth=0.4, relheight=0.5)
+	canvas_widget.place(relx=0.2, rely=0.25, relwidth=0.6, relheight=0.5)
 
 	proposal_label = Label(detalhes_proposta, text='', bg='#F0F8FF', width=100, font=('arial', 12, 'normal'))
-	proposal_label.place(relx=0, rely=0.025, relwidth=0.5, relheight=0.15)
+	proposal_label.place(relx=0.25, rely=0.025, relwidth=0.5, relheight=0.15)
 
 	vote_count = Label(detalhes_proposta, text='Votação Fechada', bg='#F0F8FF', width=100, font=('arial', 12, 'normal'))
-	vote_count.place(relx=0.05, rely=0.25, relwidth=0.1, relheight=0.05)
+	vote_count.place(relx=0.25, rely=0.25, relwidth=0.15, relheight=0.05)
 
 	vote_status_label = Label(detalhes_proposta, text='', bg='#F0F8FF', width=100, font=('arial', 12, 'normal'))
-	vote_status_label.place(relx=0.6, rely=0.25, relwidth=0.1, relheight=0.05)
+	vote_status_label.place(relx=0.65, rely=0.25, relwidth=0.2, relheight=0.05)
 
 	open_button = Button(detalhes_proposta, bg='RED', fg='WHITE', height=3, text='Abrir Votação', command=open)
-	open_button.place(relx=0.1, rely=0.8, relwidth=0.11, relheight=0.05)
+	open_button.place(relx=0.33, rely=0.8, relwidth=0.15, relheight=0.07)
 
 	close_button = Button(detalhes_proposta, bg='RED', fg='WHITE', height=3, text='Fechar Votação', command=close)
-	close_button.place(relx=0.6, rely=0.8, relwidth=0.11, relheight=0.05)
+	close_button.place(relx=0.52, rely=0.8, relwidth=0.15, relheight=0.07)
 
 	# desativar botões se necessário
 	print("aberta: " + str(aberta))
