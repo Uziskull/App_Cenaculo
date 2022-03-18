@@ -21,7 +21,7 @@ lista_propostas = db.ver_todas_propostas_e_votos()
 lista_utilizadores = db.ver_utilizadores()
 aberta = db.ver_proposta_ativa()
 if aberta is not None:
-	aberta = lista_propostas.index(aberta)
+	aberta = [i for i in range(len(lista_propostas)) if lista_propostas[i].id == aberta.id][0]
 
 def get_current_poll():
     index_list = listBoxOn.curselection()
@@ -195,7 +195,8 @@ def janela_nova(listbox_cursel):
 	detalhes_proposta = Toplevel()
 	detalhes_proposta.grab_set()
 	detalhes_proposta.title('Proposta {}'.format(id + 1))
-	detalhes_proposta.geometry('500x224')
+	detalhes_proposta.configure(background='#F0F8FF')
+	detalhes_proposta.geometry('500x500')
 
 	def view_proposal_details():
 		proposta = lista_propostas[id]
@@ -219,6 +220,7 @@ def janela_nova(listbox_cursel):
 			vote_status_label.config(text="Estado: {}".format(ESTADOS_PROPOSTA[poll_status]), fg=ESTADOS_PROPOSTA_CORES[poll_status])
 
 	def open():
+		global aberta
 		try: 
 			current_poll = lista_propostas[id]
 			db.abrir_votos_proposta(current_poll)
@@ -231,6 +233,7 @@ def janela_nova(listbox_cursel):
 			messagebox.showerror('Erro', e)
 
 	def close():
+		global aberta
 		try:
 			current_poll = get_current_poll()
 			index = lista_propostas.index(current_poll)
@@ -256,34 +259,35 @@ def janela_nova(listbox_cursel):
 
 	canvas = FigureCanvasTkAgg(plt_fig, master=detalhes_proposta)
 	canvas_widget = canvas.get_tk_widget()
-	canvas_widget.place(relx=0.55, rely=0.25, relwidth=0.4, relheight=0.5)
+	canvas_widget.place(relx=0.05, rely=0.25, relwidth=0.4, relheight=0.5)
 
 	proposal_label = Label(detalhes_proposta, text='', bg='#F0F8FF', width=100, font=('arial', 12, 'normal'))
-	proposal_label.place(relx=0.5, rely=0.025, relwidth=0.5, relheight=0.15)
+	proposal_label.place(relx=0, rely=0.025, relwidth=0.5, relheight=0.15)
 
 	vote_count = Label(detalhes_proposta, text='Votação Fechada', bg='#F0F8FF', width=100, font=('arial', 12, 'normal'))
-	vote_count.place(relx=0.55, rely=0.25, relwidth=0.1, relheight=0.05)
+	vote_count.place(relx=0.05, rely=0.25, relwidth=0.1, relheight=0.05)
 
 	vote_status_label = Label(detalhes_proposta, text='', bg='#F0F8FF', width=100, font=('arial', 12, 'normal'))
-	vote_status_label.place(relx=0.85, rely=0.25, relwidth=0.1, relheight=0.05)
+	vote_status_label.place(relx=0.6, rely=0.25, relwidth=0.1, relheight=0.05)
 
 	open_button = Button(detalhes_proposta, bg='RED', fg='WHITE', height=3, text='Abrir Votação', command=open)
-	open_button.place(relx=0.63, rely=0.8, relwidth=0.11, relheight=0.05)
+	open_button.place(relx=0.1, rely=0.8, relwidth=0.11, relheight=0.05)
 
 	close_button = Button(detalhes_proposta, bg='RED', fg='WHITE', height=3, text='Fechar Votação', command=close)
-	close_button.place(relx=0.77, rely=0.8, relwidth=0.11, relheight=0.05)
+	close_button.place(relx=0.6, rely=0.8, relwidth=0.11, relheight=0.05)
 
 	# desativar botões se necessário
+	print("aberta: " + str(aberta))
+	print("id: " + str(id))
 	if aberta == id:
 		open_button["state"] = "disabled"
+	elif aberta != None: # se existir outra aberta, não abrir nem fechar esta
+		open_button["state"] = "disabled"
+		close_button["state"] = "disabled"
 	else:
 		close_button["state"] = "disabled"
 
 	def atualizar_votos():
-		timer_votos = threading.Timer(1.0, atualizar_votos)
-		timer_votos.daemon = True
-		timer_votos.start()
-
 		if aberta == id:
 			try:
 				prop = lista_propostas[aberta]
@@ -293,8 +297,15 @@ def janela_nova(listbox_cursel):
 				# ax.bar(ind, prop.votos, width)
 				# canvas.draw()
 				vote_count.config(text="Votação Aberta\nVotos: {}/{}".format(sum(list(prop.votos)), len(lista_utilizadores)))
+			except TclError:
+				# ignorar
+				return
 			except Exception as e:
 				print("Erro ao atualizar votos: {}".format(e))
+		
+		timer_votos = threading.Timer(1.0, atualizar_votos)
+		timer_votos.daemon = True
+		timer_votos.start()
 		
 	atualizar_votos()
 
@@ -302,7 +313,8 @@ def janela_nova(listbox_cursel):
 	view_proposal_details()
 
 	def on_close():
-		pass
+		thread_status = False
+		detalhes_proposta.destroy()
 
 	detalhes_proposta.protocol('WM_DELETE_WINDOW', on_close)
 

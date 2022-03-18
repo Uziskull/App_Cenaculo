@@ -283,16 +283,17 @@ def count_votes(poll_id: str) -> Poll:
             # se já alguém votou
 
             # técnica de votação: 50+1, caso não seja aprovada/reprovada vai a segunda volta sem abstenção
-            final_votes = {VOTOS[i]:votes[i] for i in range(len(VOTOS))}
-            poll_status = ESTADOS.index("2VOLTA")
-            if final_votes["SIM"] > final_votes["NAO"] +  final_votes["ABSTER"]:
-                poll_status = ESTADOS.index("APROVADO")
-            elif final_votes["NAO"] > final_votes["SIM"] +  final_votes["ABSTER"]:
-                poll_status = ESTADOS.index("REPROVADO")
-            
             # se status já for 2ª volta, é caso de empate em segunda volta: proposta reprovada
-            if poll.status == poll_status:
-                poll_status = ESTADOS.index("REPROVADO")
+            final_votes = {VOTOS[i]:votes[i] for i in range(len(VOTOS))}
+            poll_status = ESTADOS.index("REPROVADO")
+            if poll.status != ESTADOS.index("2VOLTA"):
+                if final_votes["SIM"] > final_votes["NAO"] + final_votes["ABSTER"]:
+                    poll_status = ESTADOS.index("APROVADO")
+                elif final_votes["ABSTER"] > final_votes["SIM"] and final_votes["ABSTER"] > final_votes["SIM"]:
+                    poll_status = ESTADOS.index("2VOLTA")
+            elif final_votes["SIM"] > final_votes["NAO"]:
+                # em segunda volta, abstencoes não contam
+                poll_status = ESTADOS.index("APROVADO")
 
             poll.status = poll_status
             db.session.merge(poll)

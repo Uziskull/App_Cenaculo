@@ -16,6 +16,11 @@
     <h2 class="font_default" style="font-weight:bold; font-size: 18px;">
         Proposta {{poll.order}}: {{"(Segunda Volta)" if poll.status == 2 else ""}}
     </h2>
+    {% if poll.status == 2 %}
+    <h3 class="font_default" style="font-weight:italic; font-size: 14px;">
+        Abstenções não são contabilizadas!
+    </h3>
+    {% endif %}
     <h2 class="font_default" style="font-size: 18px;">
         {{poll.description}}
     </h2>
@@ -23,9 +28,7 @@
         <div class="row">
             <input type="hidden" name="proposta" value="{{poll.id}}">
             <input class="col ms-2 me-2 btn btn-block btn-success" type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[0]}}" value="A Favor">
-            {% if poll.status != 2 %}
             <input class="col ms-2 me-2 btn btn-block btn-secondary" type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[2]}}" value="Abster">
-            {% endif %}
             <input class="col ms-2 me-2 btn btn-block btn-danger" type="submit" {{ isDisabled }} name="{{OPCOES_VOTO[1]}}" value="Contra">
         </div>
     </form>
