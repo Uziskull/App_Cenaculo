@@ -16,7 +16,7 @@ def start_server():
         try:
             db_url_prefix = 'DATABASE_URL='
             db_url = [arg[len(db_url_prefix):] for arg in sys.argv if arg.startswith(db_url_prefix)][0]
-            db_url = "postgresql" + ":".join(db_url.split(":")[1:])
+            db_url = "postgresql:" + ":".join(db_url.split(":")[1:])
             print(db_url)
             app.config['SQLALCHEMY_DATABASE_URI'] = db_url
         except IndexError:
