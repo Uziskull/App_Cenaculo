@@ -13,8 +13,8 @@ from modelos import Proposta, Utilizador, ESTADOS_PROPOSTA, ESTADOS_PROPOSTA_COR
 import textwrap
 import threading
 
-#db = DB("http://localhost:5000/api")
-db = DB()
+db = DB("https://cenaculo.herokuapp.com/api")
+# db = DB()
 
 
 lista_propostas = db.ver_todas_propostas_e_votos()
@@ -157,6 +157,8 @@ def ver_users():
 	delete_button = Button(users, bg='RED', fg='WHITE', height=3, text='Apagar', command=lambda: delete_user(listadeusers))
 	delete_button.place(relx=0.44, rely=0.875, relwidth=0.12, relheight=0.06)
 
+	clean_button = Button(users, bg='RED', fg='WHITE', height=3, text='Logout Geral', command=lambda: db.limpar_cache_utilizadores())
+	clean_button.place(relx=0.8, rely=0.05, relwidth=0.15, relheight=0.06)
 	
 	for user in lista_utilizadores:
 		listadeusers.insert(END, user.email)
