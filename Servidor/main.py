@@ -38,4 +38,4 @@ if __name__ == '__main__':
     if debug:
         app.run(host="0.0.0.0", port=7777, debug=True, use_reloader=True)
     else:
-        app.run(port=os.environ['PORT'], debug=False, use_reloader=False)
+        app.run(host="0.0.0.0", port=os.environ['PORT'], debug=False, use_reloader=False)
