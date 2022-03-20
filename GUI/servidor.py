@@ -115,5 +115,11 @@ class DB:
         if r.status_code != 204:
             raise Exception(r.text)
 
+    def limpar_cache_utilizadores(self) -> bool:
+        """Faz logout de todos os utilizadores, retornando
+        True se a limpeza foi feita com sucesso."""
+        r = requests.post(self.url + '/utilizadores/limpar-cache', headers=self.headers)
+        return r.status_code == 200
+
 class TestDB:
     pass

@@ -25,6 +25,7 @@ def votar():
             token = session["token"]
             if not check_login(token):
                 return redirect(url_for("auth.login"))
+            token, _ = token.split(":")
         except KeyError:
             return redirect(url_for("auth.login"))
         
@@ -75,8 +76,7 @@ def historico():
     try:
         # se token estiver inválido, redirecionar para login
         try:
-            token = session["token"]
-            if not check_login(token):
+            if not check_login(session["token"]):
                 return redirect(url_for("auth.login"))
         except KeyError:
             return redirect(url_for("auth.login"))

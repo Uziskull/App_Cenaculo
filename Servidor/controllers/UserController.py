@@ -70,3 +70,10 @@ def delete_user(user_token: str) -> None:
     
     db.session.delete(user)
     db.session.commit()
+
+def clean_all_user_cache() -> None:
+    users = get_all_users()
+    for u in users:
+        u.otp = None
+        db.session.merge(u)
+    db.session.commit()

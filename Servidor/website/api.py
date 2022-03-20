@@ -121,6 +121,14 @@ def api_apagar_utilizador(user_token):
     except Exception as e:
         return str(e), 404
 
+@api.route('/utilizadores/limpar-cache', methods=["POST"])
+def api_limpar_cache_utilizadores():
+    try:
+        UserController.clean_all_user_cache()
+        return "OK", 200
+    except Exception as e:
+        return str(e), 404
+
 ###################################
 # validação
 ###################################

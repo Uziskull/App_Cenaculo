@@ -225,6 +225,9 @@ def delete_poll(poll_id: str) -> None:
     if active_poll is not None and active_poll.poll_id == poll_id:
         raise PollDeleteOpenError()
 
+    # limpar votos associados com voto
+    Vote.query.filter(Vote.poll_id == poll_id).delete()
+
     deleted_order = poll.order
     db.session.delete(poll)
 
@@ -289,7 +292,7 @@ def count_votes(poll_id: str) -> Poll:
             if poll.status != ESTADOS.index("2VOLTA"):
                 if final_votes["SIM"] > final_votes["NAO"] + final_votes["ABSTER"]:
                     poll_status = ESTADOS.index("APROVADO")
-                elif final_votes["ABSTER"] > final_votes["SIM"] and final_votes["ABSTER"] > final_votes["SIM"]:
+                elif final_votes["ABSTER"] >= final_votes["NAO"]:
                     poll_status = ESTADOS.index("2VOLTA")
             elif final_votes["SIM"] > final_votes["NAO"]:
                 # em segunda volta, abstencoes não contam

@@ -18,6 +18,7 @@ db = DB()
 
 
 lista_propostas = db.ver_todas_propostas_e_votos()
+db.limpar_cache_utilizadores()
 lista_utilizadores = db.ver_utilizadores()
 aberta = db.ver_proposta_ativa()
 if aberta is not None:
@@ -217,7 +218,8 @@ def janela_nova(listbox_cursel):
 		if poll_status is None:
 			vote_status_label.config(text='')
 		else:
-			vote_status_label.config(text="Estado: {}".format(ESTADOS_PROPOSTA[poll_status]), fg=ESTADOS_PROPOSTA_CORES[poll_status])
+			vote_status_label.config(text="Estado: {}\n{} A Favor | {} Contra | {} Abstenções".format(ESTADOS_PROPOSTA[poll_status],
+				proposta.votos[0], proposta.votos[1], proposta.votos[2]), fg=ESTADOS_PROPOSTA_CORES[poll_status])
 
 	def open():
 		global aberta
@@ -278,11 +280,12 @@ def janela_nova(listbox_cursel):
 	close_button.place(relx=0.52, rely=0.8, relwidth=0.15, relheight=0.07)
 
 	# desativar botões se necessário
-	print("aberta: " + str(aberta))
-	print("id: " + str(id))
 	if aberta == id:
+		# se proposta está aberta, desativar opção para voltar a abrir
 		open_button["state"] = "disabled"
-	elif aberta != None: # se existir outra aberta, não abrir nem fechar esta
+	elif aberta is not None or lista_propostas[id].status not in [None, ESTADOS_PROPOSTA.index("2ª Volta")]:
+		# se existir outra proposta aberta, ou se proposta já estiver aprovada/reprovada,
+		# não permitir a abertura ou fecho desta
 		open_button["state"] = "disabled"
 		close_button["state"] = "disabled"
 	else:
