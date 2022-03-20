@@ -15,7 +15,9 @@ def start_server():
     except KeyError:
         try:
             db_url_prefix = 'DATABASE_URL='
-            app.config['SQLALCHEMY_DATABASE_URI'] = [arg[len(db_url_prefix):] for arg in sys.argv if arg.startswith(db_url_prefix)][0]
+            db_url = [arg[len(db_url_prefix):] for arg in sys.argv if arg.startswith(db_url_prefix)][0]
+            db_url = "postgresql" + ":".join(db_url.split(":")[1:])
+            app.config['SQLALCHEMY_DATABASE_URI'] = db_url
         except IndexError:
             #print("Defina 'DATABASE_URL' nas variáveis de ambiente (ou nos argumentos de execução) com o URI do PostgreSQL!")
             #sys.exit(1)
