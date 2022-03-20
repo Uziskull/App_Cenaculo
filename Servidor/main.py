@@ -1,6 +1,6 @@
 from website import start_server
 from flask import render_template
-import sys
+import sys, os
 
 app = start_server()
 
@@ -38,4 +38,4 @@ if __name__ == '__main__':
     if debug:
         app.run(host="0.0.0.0", port=7777, debug=True, use_reloader=True)
     else:
-        app.run(debug=False, use_reloader=False)
+        app.run(port=os.environ['PORT'], debug=False, use_reloader=False)
