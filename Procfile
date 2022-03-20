@@ -1,1 +1,1 @@
-web: python main.py debug=false
+web: python Servidor/main.py debug=false
