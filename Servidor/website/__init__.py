@@ -11,16 +11,16 @@ def start_server():
     app.jinja_env.globals["ESTADOS_PROPOSTA"] = ESTADOS
 
     try:
-        db_url = "postgresql:" + ":".join(os.environ['DATABASE_URL'].split(":")[1:])
+        db_url = "postgresql:" + ":".join(os.environ['BACKEND_URL'].split(":")[1:])
         app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     except KeyError:
         try:
-            db_url_prefix = 'DATABASE_URL='
+            db_url_prefix = 'BACKEND_URL='
             db_url = [arg[len(db_url_prefix):] for arg in sys.argv if arg.startswith(db_url_prefix)][0]
             db_url = "postgresql:" + ":".join(db_url.split(":")[1:])
             app.config['SQLALCHEMY_DATABASE_URI'] = db_url
         except IndexError:
-            #print("Defina 'DATABASE_URL' nas variáveis de ambiente (ou nos argumentos de execução) com o URI do PostgreSQL!")
+            #print("Defina 'BACKEND_URL' nas variáveis de ambiente (ou nos argumentos de execução) com o URI do PostgreSQL!")
             #sys.exit(1)
             print("A correr com base de dados em memória")
             app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
