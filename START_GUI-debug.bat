@@ -1,0 +1,1 @@
+venv\Scripts\activate.bat & title [GUI] & cd GUI & python main.py http://localhost:7777/api

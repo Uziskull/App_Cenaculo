@@ -1,1 +1,1 @@
-venv\Scripts\activate.bat & title [GUI] & cd GUI & python main.py
+venv\Scripts\activate.bat & title [GUI] & cd GUI & python main.py https://cenaculo.herokuapp.com/api

@@ -13,8 +13,8 @@ from modelos import Proposta, Utilizador, ESTADOS_PROPOSTA, ESTADOS_PROPOSTA_COR
 import textwrap
 import threading
 
-db = DB("https://cenaculo.herokuapp.com/api")
-# db = DB()
+#db = DB("https://cenaculo.herokuapp.com/api")
+db = DB(sys.argv[1])
 
 
 lista_propostas = db.ver_todas_propostas_e_votos()
