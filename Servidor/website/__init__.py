@@ -11,8 +11,8 @@ def start_server():
     app.jinja_env.globals["ESTADOS_PROPOSTA"] = ESTADOS
 
     try:
-        #db_url = "postgresql:" + ":".join(os.environ['DATABASE_URL'].split(":")[1:])
-        db_url = os.environ['DATABASE_URL'] + "&sslrootcert=cockroachlabs-cluster.crt"
+        db_url = "cockroachdb:" + ":".join(os.environ['DATABASE_URL'].split(":")[1:]) + "&sslrootcert=cockroachlabs-cluster.crt"
+        #db_url = os.environ['DATABASE_URL'] + "&sslrootcert=Servidor/cockroachlabs-cluster.crt"
         app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     except KeyError:
         try:
