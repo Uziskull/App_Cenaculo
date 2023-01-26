@@ -15,7 +15,7 @@ def api_ver_propostas():
 def api_ver_votos():
     result = do_transaction(
         lambda s: VoteController.get_all_polls_and_results(s, db))
-    return result, 200
+    return str(result), 200
     #return jsonify(as_dict(result)), 200
     # return [
     #     {
