@@ -13,9 +13,10 @@ def api_ver_propostas():
 
 @api.route('/propostas/votos', methods=["GET"])
 def api_ver_votos():
-    result = do_transaction(
-        lambda s: VoteController.get_all_polls_and_results(s, db))
-    return jsonify(as_dict(result)), 200
+    def inner_func(s):
+        result = VoteController.get_all_polls_and_results(s, db)
+        return jsonify(as_dict(result)), 200
+    return do_transaction(inner_func)
     # return [
     #     {
     #         "id": result[i].poll.id,
@@ -39,13 +40,13 @@ def api_ver_proposta_ativa():
 
 @api.route('/propostas', methods=["POST"])
 def api_criar_proposta():
+    def inner_func(s):
+        count = VoteController.count_polls(s)
+        new_poll = VoteController.create_poll(s, count + 1, body["description"])
+        return jsonify(as_dict(new_poll)), 201
     try:
         body = request.get_json(force=True)
-        count = do_transaction(
-            lambda s: VoteController.count_polls(s))
-        new_poll = do_transaction(
-            lambda s: VoteController.create_poll(s, count + 1, body["description"]))
-        return jsonify(as_dict(new_poll)), 201
+        return do_transaction(lambda s: inner_func(s, body))
     except UniqueViolation as e:
         return "Já existe uma proposta com essa descrição!", 404
     except Exception as e:
@@ -53,10 +54,11 @@ def api_criar_proposta():
 
 @api.route('/propostas/<poll_id>/votos', methods=["GET"])
 def api_ver_votos_proposta(poll_id):
-    try:
-        votes = do_transaction(
-            lambda s: VoteController.get_votes_for(s, db, poll_id))
+    def inner_func(s, poll_id):
+        votes = VoteController.get_votes_for(s, db, poll_id)
         return jsonify(as_dict(votes)), 200
+    try:
+        return do_transaction(lambda s: inner_func(s, poll_id))
     except Exception as e:
         return str(e), 404
 
@@ -98,12 +100,10 @@ def api_abrir_votos(poll_id):
 def api_fechar_votos(poll_id):
     def inner_func(s, poll_id):
         VoteController.close_poll(s, poll_id)
-        return VoteController.count_votes(s, poll_id)
-        
-    try:
-        updated_poll = do_transaction(
-            lambda s: inner_func(s, poll_id))
+        updated_poll = VoteController.count_votes(s, poll_id)
         return jsonify(as_dict(updated_poll)), 200
+    try:
+        return do_transaction(lambda s: inner_func(s, poll_id))
     except Exception as e:
         return str(e), 404
 
@@ -115,15 +115,16 @@ def api_ver_utilizadores():
 
 @api.route('/utilizadores', methods=["POST"])
 def api_adicionar_utilizadores():
-    try:
-        body = request.get_json(force=True)
+    def inner_func(s, body):
         if not isinstance(body, list) \
             or not all(isinstance(obj, str) for obj in body):
             return "Não é lista de strings", 400
         
-        new_users = do_transaction(
-            lambda s: UserController.insert_multiple_users(s, body))
+        new_users = UserController.insert_multiple_users(s, body)
         return jsonify(as_dict(new_users)), 200
+    try:
+        body = request.get_json(force=True)
+        return do_transaction(lambda s: inner_func(s, body))
     except Exception as e:
         return str(e), 404
 
