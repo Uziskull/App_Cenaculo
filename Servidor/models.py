@@ -8,7 +8,7 @@ from sqlalchemy_cockroachdb import run_transaction
 db = SQLAlchemy()
 
 def do_transaction(func):
-    run_transaction(sessionmaker(bind=db.get_engine()), func)
+    return run_transaction(sessionmaker(bind=db.get_engine()), func)
 
 #############################################
 ## Classes
