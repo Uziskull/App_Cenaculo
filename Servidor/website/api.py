@@ -1,7 +1,7 @@
 from flask import Blueprint, request, current_app#, jsonify
 from json import dumps as jsonify
 from controllers import VoteController, UserController
-from models import as_dict
+from models import as_dict, db, do_transaction
 from psycopg2.errors import UniqueViolation
 
 api = Blueprint('api', __name__)
@@ -13,7 +13,8 @@ def api_ver_propostas():
 
 @api.route('/propostas/votos', methods=["GET"])
 def api_ver_votos():
-    result = VoteController.get_all_polls_and_results()
+    result = do_transaction(
+        lambda s: VoteController.get_all_polls_and_results(s, db))
     return jsonify(as_dict(result)), 200
     # return [
     #     {
@@ -40,8 +41,10 @@ def api_ver_proposta_ativa():
 def api_criar_proposta():
     try:
         body = request.get_json(force=True)
-        count = VoteController.count_polls()
-        new_poll = VoteController.create_poll(count + 1, body["description"])
+        count = do_transaction(
+            lambda s: VoteController.count_polls(s))
+        new_poll = do_transaction(
+            lambda s: VoteController.create_poll(s, count + 1, body["description"]))
         return jsonify(as_dict(new_poll)), 201
     except UniqueViolation as e:
         return "Já existe uma proposta com essa descrição!", 404
@@ -51,7 +54,8 @@ def api_criar_proposta():
 @api.route('/propostas/<poll_id>/votos', methods=["GET"])
 def api_ver_votos_proposta(poll_id):
     try:
-        votes = VoteController.get_votes_for(poll_id)
+        votes = do_transaction(
+            lambda s: VoteController.get_votes_for(s, db, poll_id))
         return jsonify(as_dict(votes)), 200
     except Exception as e:
         return str(e), 404
@@ -61,10 +65,12 @@ def api_alterar_proposta(poll_id):
     try:
         body = request.get_json(force=True)
         if "description" in body:
-            VoteController.edit_poll(poll_id, body["description"])
+            do_transaction(
+                lambda s: VoteController.edit_poll(s, poll_id, body["description"]))
         
         if "order" in body:
-            VoteController.order_poll(poll_id, body["order"])
+            do_transaction(
+                lambda s: VoteController.order_poll(s, poll_id, body["order"]))
         
         return "", 200
     except Exception as e:
@@ -73,7 +79,8 @@ def api_alterar_proposta(poll_id):
 @api.route('/propostas/<poll_id>', methods=["DELETE"])
 def api_apagar_proposta(poll_id):
     try:
-        VoteController.delete_poll(poll_id)
+        do_transaction(
+            lambda s: VoteController.delete_poll(s, poll_id))
         return "", 204
     except Exception as e:
         return str(e), 404
@@ -81,16 +88,21 @@ def api_apagar_proposta(poll_id):
 @api.route('/propostas/<poll_id>/abrir', methods=["POST"])
 def api_abrir_votos(poll_id):
     try:
-        VoteController.open_poll(poll_id)
+        do_transaction(
+            lambda s: VoteController.open_poll(s, poll_id))
         return "", 200
     except Exception as e:
         return str(e), 404
 
 @api.route('/propostas/<poll_id>/fechar', methods=["POST"])
 def api_fechar_votos(poll_id):
+    def inner_func(s, poll_id):
+        VoteController.close_poll(s, poll_id)
+        return VoteController.count_votes(s, poll_id)
+        
     try:
-        VoteController.close_poll(poll_id)
-        updated_poll = VoteController.count_votes(poll_id)
+        updated_poll = do_transaction(
+            lambda s: inner_func(s, poll_id))
         return jsonify(as_dict(updated_poll)), 200
     except Exception as e:
         return str(e), 404
@@ -108,15 +120,18 @@ def api_adicionar_utilizadores():
         if not isinstance(body, list) \
             or not all(isinstance(obj, str) for obj in body):
             return "Não é lista de strings", 400
-            
-        return jsonify(as_dict(UserController.insert_multiple_users(body))), 200
+        
+        new_users = do_transaction(
+            lambda s: UserController.insert_multiple_users(s, body))
+        return jsonify(as_dict(new_users)), 200
     except Exception as e:
         return str(e), 404
 
 @api.route('/utilizadores/<user_token>', methods=["DELETE"])
 def api_apagar_utilizador(user_token):
     try:
-        UserController.delete_user(user_token)
+        do_transaction(
+            lambda s: UserController.delete_user(s, user_token))
         return "", 204
     except Exception as e:
         return str(e), 404
@@ -124,7 +139,8 @@ def api_apagar_utilizador(user_token):
 @api.route('/utilizadores/limpar-cache', methods=["POST"])
 def api_limpar_cache_utilizadores():
     try:
-        UserController.clean_all_user_cache()
+        do_transaction(
+            lambda s: UserController.clean_all_user_cache(s))
         return "OK", 200
     except Exception as e:
         return str(e), 404

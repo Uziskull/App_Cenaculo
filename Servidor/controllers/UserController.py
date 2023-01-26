@@ -1,5 +1,6 @@
 from typing import List, Sequence
-from models import User, db
+from models import User
+from sqlalchemy.orm import Session
 
 # ----------------------------------------- #
 # Erros
@@ -32,48 +33,43 @@ def is_login_valid(token: str, otp: str):
         return False
     return u.otp == otp
 
-def store_login(token: str, otp: str):
+def store_login(s: Session, token: str, otp: str):
     u = User.query.get(token)
     if u is None:
         raise UserNotFoundError()
     if u.otp is not None:
         raise UserAlreadyLoggedIn()
     u.otp = otp
-    db.session.merge(u)
-    db.session.commit()
+    s.merge(u)
 
-def log_out(token: str, otp: str):
+def log_out(s: Session, token: str, otp: str):
     u = User.query.filter_by(token=token, otp=otp).first()
     if u is None:
         raise UserNotFoundError()
     u.otp = None
-    db.session.merge(u)
-    db.session.commit()
+    s.merge(u)
 
 # ----------------------------------------- #
 # GUI
 # ----------------------------------------- #
 
-def insert_multiple_users(user_emails: Sequence[str]) -> List[User]:
+def insert_multiple_users(s: Session, user_emails: Sequence[str]) -> List[User]:
     new_users = [User(email) for email in user_emails]
-    db.session.add_all(new_users)
-    db.session.commit()
+    s.add_all(new_users)
     return new_users
 
 def get_all_users() -> List[User]:
     return User.query.all()
 
-def delete_user(user_token: str) -> None:
+def delete_user(s: Session, user_token: str) -> None:
     user = User.query.get(user_token)
     if user is None:
         raise UserNotFoundError()
     
-    db.session.delete(user)
-    db.session.commit()
+    s.delete(user)
 
-def clean_all_user_cache() -> None:
+def clean_all_user_cache(s: Session) -> None:
     users = get_all_users()
     for u in users:
         u.otp = None
-        db.session.merge(u)
-    db.session.commit()
+        s.merge(u)
