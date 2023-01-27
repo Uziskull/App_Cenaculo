@@ -1,6 +1,6 @@
 import os, sys
 from flask import Flask
-from models import db
+from models import create_db #db
 from controllers.VoteController import VOTOS, ESTADOS
 
 def start_server():
@@ -29,7 +29,8 @@ def start_server():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'mama que eh de uva'
 
-    db.init_app(app)
+    #db.init_app(app)
+    create_db(app)
 
     from .views import views
     from .auth import auth

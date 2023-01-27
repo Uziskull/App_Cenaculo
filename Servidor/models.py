@@ -4,7 +4,10 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.inspection import inspect
 from sqlalchemy_cockroachdb import run_transaction
 
-db = SQLAlchemy()
+#db = SQLAlchemy()
+db: SQLAlchemy = None
+def create_db(app):
+    db = SQLAlchemy(app)
 
 def do_transaction(func):
     return run_transaction(sqlalchemy.orm.sessionmaker(db.engine), func)
