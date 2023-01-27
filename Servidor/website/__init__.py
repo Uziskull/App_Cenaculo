@@ -1,5 +1,4 @@
 import os, sys
-from flask import Flask
 from models import get_app
 from controllers.VoteController import VOTOS, ESTADOS
 

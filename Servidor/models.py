@@ -1,4 +1,5 @@
 from uuid import uuid4
+from flask import Flask
 import sqlalchemy
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.inspection import inspect
