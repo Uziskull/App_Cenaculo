@@ -4,10 +4,15 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.inspection import inspect
 from sqlalchemy_cockroachdb import run_transaction
 
-db = SQLAlchemy()
+app = Flask(__name__)
+db = SQLAlchemy(app)
+sessionmaker = sqlalchemy.orm.sessionmaker(db.engine)
+
+def get_app():
+    return app
 
 def do_transaction(func):
-    return run_transaction(sqlalchemy.orm.sessionmaker(db.engine), func)
+    return run_transaction(sessionmaker, func)
 
 #############################################
 ## Classes

@@ -1,9 +1,10 @@
 import os, sys
 from flask import Flask
+from models import get_app
 from controllers.VoteController import VOTOS, ESTADOS
 
 def start_server():
-    app = Flask(__name__)
+    app = get_app()
 
     # inserir opções de voto e estados de proposta como variáveis globais
     app.jinja_env.globals["OPCOES_VOTO"] = VOTOS
