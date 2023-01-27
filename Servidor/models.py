@@ -1,19 +1,14 @@
 from uuid import uuid4
-from flask import Flask
-import sqlalchemy
 from flask_sqlalchemy import SQLAlchemy
+import sqlalchemy
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy_cockroachdb import run_transaction
 
-app = Flask(__name__)
-db = SQLAlchemy(app)
-sessionmaker = sqlalchemy.orm.sessionmaker(db.engine)
-
-def get_app():
-    return app
+db = SQLAlchemy()
 
 def do_transaction(func):
-    return run_transaction(sessionmaker, func)
+    return run_transaction(sessionmaker(bind=db.get_engine()), func)
 
 #############################################
 ## Classes

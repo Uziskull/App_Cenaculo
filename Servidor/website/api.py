@@ -8,10 +8,8 @@ api = Blueprint('api', __name__)
 
 @api.route('/propostas', methods=["GET"])
 def api_ver_propostas():
-    def inner_func(s):
-        result = VoteController.get_all_polls(s)
-        return jsonify(as_dict(result)), 200
-    return do_transaction(inner_func)
+    result = VoteController.get_all_polls()
+    return jsonify(as_dict(result)), 200
 
 @api.route('/propostas/votos', methods=["GET"])
 def api_ver_votos():
@@ -35,12 +33,10 @@ def api_ver_votos():
 
 @api.route('/propostas/ativa', methods=["GET"])
 def api_ver_proposta_ativa():
-    def inner_func(s):
-        poll = VoteController.get_current_poll()
-        if poll is None:
-            return "", 204
-        return jsonify(as_dict(poll)), 200
-    return do_transaction(inner_func)
+    poll = VoteController.get_current_poll()
+    if poll is None:
+        return "", 204
+    return jsonify(as_dict(poll)), 200
 
 @api.route('/propostas', methods=["POST"])
 def api_criar_proposta():
@@ -115,9 +111,7 @@ def api_fechar_votos(poll_id):
 
 @api.route('/utilizadores', methods=["GET"])
 def api_ver_utilizadores():
-    def inner_func(s):
-        return jsonify(as_dict(UserController.get_all_users())), 200
-    return do_transaction(lambda s: inner_func(s))
+    return jsonify(as_dict(UserController.get_all_users())), 200
 
 @api.route('/utilizadores', methods=["POST"])
 def api_adicionar_utilizadores():

@@ -1,9 +1,10 @@
 import os, sys
-from models import get_app
+from flask import Flask
+from models import db
 from controllers.VoteController import VOTOS, ESTADOS
 
 def start_server():
-    app = get_app()
+    app = Flask(__name__)
 
     # inserir opções de voto e estados de proposta como variáveis globais
     app.jinja_env.globals["OPCOES_VOTO"] = VOTOS
@@ -28,7 +29,6 @@ def start_server():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'mama que eh de uva'
 
-    from models import db
     db.init_app(app)
 
     from .views import views
