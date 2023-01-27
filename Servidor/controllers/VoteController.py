@@ -76,12 +76,12 @@ def vote_with_token(s: Session, token: str, vote: str, poll_id: str):
         raise BadVoteError(vote)
 
     # verificar se existem propostas abertas
-    current_poll = get_current_poll()
+    current_poll = get_current_poll(s)
     if current_poll is None:
         raise VotingPeriodError()
 
     # verificar se proposta existe
-    possible_poll = Poll.query.get(poll_id)
+    possible_poll = s.query(Poll).get(poll_id)
     if possible_poll is None:
         raise PollNotFoundError()
 
@@ -96,23 +96,23 @@ def vote_with_token(s: Session, token: str, vote: str, poll_id: str):
         # raise VotingClosedError(has_previous_votes)
 
     # verificar se utilizador já votou
-    if already_voted(token, poll_id):
+    if already_voted(s, token, poll_id):
         raise DuplicateVoteError()
     
     s.add(Vote(token, poll_id, vote_num))
 
-def already_voted(token: str, poll_id: str):
-    uv = Vote.query.filter_by(user_token=token, poll_id=poll_id).first()
+def already_voted(s: Session, token: str, poll_id: str):
+    uv = s.query(Vote).filter_by(user_token=token, poll_id=poll_id).first()
     return uv is not None
 
-def get_current_poll():
-    active_poll = ActivePoll.query.first()
+def get_current_poll(s: Session):
+    active_poll = s.query(ActivePoll).first()
     if active_poll is None:
         return None
-    return Poll.query.get(active_poll.poll_id)
+    return s.query(Poll).get(active_poll.poll_id)
 
-def get_all_polls():
-    return Poll.query.order_by(Poll.order).all()
+def get_all_polls(s: Session):
+    return s.query(Poll).order_by(Poll.order).all()
 
 def get_all_polls_and_results(s: Session, db: SQLAlchemy):
     # este gatafunho devolve todas as propostas e o seu número de votos positivos/negativos/neutros
@@ -175,7 +175,7 @@ def get_votes_for(s: Session, db: SQLAlchemy, poll_id: str):
         .one()
 
 def order_poll(s: Session, poll_id: str, new_order: int) -> None:
-    polls = get_all_polls()
+    polls = get_all_polls(s)
 
     # verificar se ordem está dentro dos limites
     if new_order <= 0 or new_order > len(polls):
@@ -204,7 +204,7 @@ def order_poll(s: Session, poll_id: str, new_order: int) -> None:
         s.merge(p)
 
 def edit_poll(s: Session, poll_id: str, new_description: str) -> None:
-    poll = Poll.query.get(poll_id)
+    poll = s.query(Poll).get(poll_id)
     if poll is None:
         raise PollNotFoundError()
     
@@ -215,21 +215,21 @@ def edit_poll(s: Session, poll_id: str, new_description: str) -> None:
     s.merge(poll)
 
 def delete_poll(s: Session, poll_id: str) -> None:
-    poll = Poll.query.get(poll_id)
+    poll = s.query(Poll).get(poll_id)
     if poll is None:
         raise PollNotFoundError()
 
-    active_poll = ActivePoll.query.first()
+    active_poll = s.query(ActivePoll).first()
     if active_poll is not None and active_poll.poll_id == poll_id:
         raise PollDeleteOpenError()
 
     # limpar votos associados com voto
-    Vote.query.filter(Vote.poll_id == poll_id).delete()
+    s.query(Vote).filter(Vote.poll_id == poll_id).delete()
 
     deleted_order = poll.order
     s.delete(poll)
 
-    polls = get_all_polls()
+    polls = get_all_polls(s)
     if deleted_order < len(polls):
         polls_to_change = polls[deleted_order - 1:]
         for p in polls_to_change:
@@ -237,11 +237,11 @@ def delete_poll(s: Session, poll_id: str) -> None:
             s.merge(p)
 
 def open_poll(s: Session, poll_id: str) -> None:
-    active_poll = ActivePoll.query.first()
+    active_poll = s.query(ActivePoll).first()
     if active_poll is not None:
         raise PollAlreadyOpenError()
     
-    poll = Poll.query.get(poll_id)
+    poll = s.query(Poll).get(poll_id)
     if poll is None:
         raise PollNotFoundError()
 
@@ -249,7 +249,7 @@ def open_poll(s: Session, poll_id: str) -> None:
         raise VotingClosedError(True)
     elif poll.status == ESTADOS.index("2VOLTA"):
         # se for 2ª volta, limpar votos existentes
-        Vote.query.filter(Vote.poll_id == poll_id).delete()
+        s.query(Vote).filter(Vote.poll_id == poll_id).delete()
         s.commit()
 
     active_poll = ActivePoll(poll_id)
@@ -257,7 +257,7 @@ def open_poll(s: Session, poll_id: str) -> None:
 
 
 def close_poll(s: Session, poll_id: str) -> None:
-    active_poll = ActivePoll.query.first()
+    active_poll = s.query(ActivePoll).first()
     if active_poll is None:
         raise VotingPeriodError()
     
@@ -267,14 +267,14 @@ def close_poll(s: Session, poll_id: str) -> None:
     s.delete(active_poll)
 
 def count_votes(s: Session, poll_id: str) -> Poll:
-    poll = Poll.query.get(poll_id)
+    poll = s.query(Poll).get(poll_id)
     if poll is None:
         raise PollNotFoundError()
 
     if poll.status not in [None, ESTADOS.index("2VOLTA")]:
         raise VotingClosedError(True)
 
-    votes = get_votes_for(poll_id)
+    votes = get_votes_for(s, poll_id)
     for i in range(len(VOTOS)):
         if votes[i] > 0:
             # se já alguém votou
