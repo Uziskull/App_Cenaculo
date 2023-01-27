@@ -3,6 +3,7 @@ from flask import Flask
 from models import db
 from controllers.VoteController import VOTOS, ESTADOS
 
+
 def start_server():
     app = Flask(__name__)
 
