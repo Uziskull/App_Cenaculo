@@ -1,5 +1,3 @@
-import sqlalchemy
-import flask_sqlalchemy
 from website import start_server
 from flask import render_template
 import sys, os
