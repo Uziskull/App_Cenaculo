@@ -15,7 +15,7 @@ def not_found(error):
 @app.errorhandler(500)
 def not_found(error):
     return render_template('erro.html'), 500
-
+ 
 #######################################
 # base de dados
 #######################################
