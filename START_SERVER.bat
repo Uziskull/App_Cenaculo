@@ -1,1 +1,1 @@
-venv\Scripts\activate.bat & title [Servidor] & cd Servidor & python main.py debug=false DATABASE_URL=postgresql://postgres:admin@localhost:5432/propostas & pause
+venv\Scripts\activate.bat & title [Servidor] & cd Servidor & python main.py debug=true DATABASE_URL=postgres://Uziskull:Ih0TwFzE9rQS@ep-fancy-scene-238475.eu-central-1.aws.neon.tech/neondb & pause

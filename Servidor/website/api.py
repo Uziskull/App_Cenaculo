@@ -14,6 +14,7 @@ def api_ver_propostas():
 @api.route('/propostas/votos', methods=["GET"])
 def api_ver_votos():
     result = VoteController.get_all_polls_and_results()
+    print(result)
     return jsonify(as_dict(result)), 200
     # return [
     #     {

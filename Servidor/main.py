@@ -20,12 +20,11 @@ def not_found(error):
 # base de dados
 #######################################
 
-app.app_context().push()
-
-# finalizar a ligação da db, e criar tabelas todas
-import models
-models.db.create_all()
-models.db.session.commit()
+with app.app_context():
+    # finalizar a ligação da db, e criar tabelas todas
+    import models
+    models.db.create_all()
+    models.db.session.commit()
 
 DEBUG_FLAG_OFF = "debug=false"
 if __name__ == '__main__':

@@ -79,7 +79,8 @@ def vote_with_token(token: str, vote: str, poll_id: str):
         raise VotingPeriodError()
 
     # verificar se proposta existe
-    possible_poll = Poll.query.get(poll_id)
+    #possible_poll = Poll.query.get(poll_id)
+    possible_poll = db.session.execute(db.select(Poll).where(Poll.id == poll_id)).scalar()
     if possible_poll is None:
         raise PollNotFoundError()
 
@@ -101,51 +102,79 @@ def vote_with_token(token: str, vote: str, poll_id: str):
     db.session.commit()
 
 def already_voted(token: str, poll_id: str):
-    uv = Vote.query.filter_by(user_token=token, poll_id=poll_id).first()
+    #uv = Vote.query.filter_by(user_token=token, poll_id=poll_id).first()
+    uv = db.session.execute(db.select(Vote).where(Vote.user_token == token).where(Vote.poll_id == poll_id)).scalar()
     return uv is not None
 
 def get_current_poll():
-    active_poll = ActivePoll.query.first()
+    #active_poll = ActivePoll.query.first()
+    active_poll = db.session.execute(db.select(ActivePoll)).scalar()
     if active_poll is None:
         return None
-    return Poll.query.get(active_poll.poll_id)
+    #return Poll.query.get(active_poll.poll_id)
+    return db.session.execute(db.select(Poll).where(Poll.id == active_poll[0].poll_id)).scalar()
 
 def get_all_polls():
-    return Poll.query.order_by(Poll.order).all()
+    #return Poll.query.order_by(Poll.order).all()
+    return db.session.execute(db.select(Poll).order_by(Poll.order)).scalars().all()
 
 def get_all_polls_and_results():
     # este gatafunho devolve todas as propostas e o seu número de votos positivos/negativos/neutros
     # ordem de votos é a estabelecida em 'VOTOS': sim, não, abster
-    return db.Query([
+    #return db.Query([
+    #        Poll.id,
+    #        Poll.description,
+    #        Poll.order,
+    #        db.func.count(db.case(
+    #            [((Vote.vote_option == 0), Vote.user_token)],
+    #            else_=db.literal_column("NULL")
+    #        )).label(VOTOS[0].lower()),
+    #        db.func.count(db.case(
+    #            [((Vote.vote_option == 1), Vote.user_token)],
+    #            else_=db.literal_column("NULL")
+    #        )).label(VOTOS[1].lower()),
+    #        db.func.count(db.case(
+    #            [((Vote.vote_option == 2), Vote.user_token)],
+    #            else_=db.literal_column("NULL")
+    #        )).label(VOTOS[2].lower()),
+    #        Poll.status],
+    #        session=db.session) \
+    #    .select_from(Poll) \
+    #    .join(Vote, isouter=True) \
+    #    .group_by(Poll.id, Poll.description, Poll.order) \
+    #    .order_by(Poll.order) \
+    #    .all()
+    return db.session.execute(
+        db.select(
             Poll.id,
             Poll.description,
             Poll.order,
             db.func.count(db.case(
-                [((Vote.vote_option == 0), Vote.user_token)],
+                (Vote.vote_option == 0, Vote.user_token),
                 else_=db.literal_column("NULL")
             )).label(VOTOS[0].lower()),
             db.func.count(db.case(
-                [((Vote.vote_option == 1), Vote.user_token)],
+                (Vote.vote_option == 1, Vote.user_token),
                 else_=db.literal_column("NULL")
             )).label(VOTOS[1].lower()),
             db.func.count(db.case(
-                [((Vote.vote_option == 2), Vote.user_token)],
+                (Vote.vote_option == 2, Vote.user_token),
                 else_=db.literal_column("NULL")
             )).label(VOTOS[2].lower()),
-            Poll.status],
-            session=db.session) \
+            Poll.status) \
         .select_from(Poll) \
         .join(Vote, isouter=True) \
         .group_by(Poll.id, Poll.description, Poll.order) \
-        .order_by(Poll.order) \
-        .all()
+        .order_by(Poll.order)
+    ).all()
 
 # ----------------------------------------- #
 # GUI
 # ----------------------------------------- #
 
 def count_polls() -> int:
-    return db.session.query(Poll).count()
+    #return db.session.query(Poll).count()
+    return len(db.session.execute(db.select(Poll)).scalars().all())
 
 def create_poll(order: int, description: str) -> Poll:
     # adicionar proposta no final da lista
@@ -156,23 +185,40 @@ def create_poll(order: int, description: str) -> Poll:
     return new_poll
 
 def get_votes_for(poll_id: str):
-    return db.Query([
+    #return db.Query([
+    #        db.func.count(db.case(
+    #            [((Vote.vote_option == 0), Vote.user_token)],
+    #            else_=db.literal_column("NULL")
+    #        )).label(VOTOS[0].lower()),
+    #        db.func.count(db.case(
+    #            [((Vote.vote_option == 1), Vote.user_token)],
+    #            else_=db.literal_column("NULL")
+    #        )).label(VOTOS[1].lower()),
+    #        db.func.count(db.case(
+    #            [((Vote.vote_option == 2), Vote.user_token)],
+    #            else_=db.literal_column("NULL")
+    #        )).label(VOTOS[2].lower())],
+    #        session=db.session) \
+    #    .select_from(Vote) \
+    #    .filter(Vote.poll_id == poll_id) \
+    #    .one()
+    return db.session.execute(
+        db.select(
             db.func.count(db.case(
-                [((Vote.vote_option == 0), Vote.user_token)],
+                ((Vote.vote_option == 0), Vote.user_token),
                 else_=db.literal_column("NULL")
             )).label(VOTOS[0].lower()),
             db.func.count(db.case(
-                [((Vote.vote_option == 1), Vote.user_token)],
+                ((Vote.vote_option == 1), Vote.user_token),
                 else_=db.literal_column("NULL")
             )).label(VOTOS[1].lower()),
             db.func.count(db.case(
-                [((Vote.vote_option == 2), Vote.user_token)],
+                ((Vote.vote_option == 2), Vote.user_token),
                 else_=db.literal_column("NULL")
-            )).label(VOTOS[2].lower())],
-            session=db.session) \
-        .select_from(Vote) \
-        .filter(Vote.poll_id == poll_id) \
-        .one()
+            )).label(VOTOS[2].lower())) \
+        .select_from(Vote)
+        .filter(Vote.poll_id == poll_id)
+    ).one()
 
 def order_poll(poll_id: str, new_order: int) -> None:
     polls = get_all_polls()
@@ -205,7 +251,8 @@ def order_poll(poll_id: str, new_order: int) -> None:
     db.session.commit()
 
 def edit_poll(poll_id: str, new_description: str) -> None:
-    poll = Poll.query.get(poll_id)
+    #poll = Poll.query.get(poll_id)
+    poll = db.session.execute(db.select(Poll).where(Poll.id == poll_id)).scalar()
     if poll is None:
         raise PollNotFoundError()
     
@@ -217,16 +264,21 @@ def edit_poll(poll_id: str, new_description: str) -> None:
     db.session.commit()
 
 def delete_poll(poll_id: str) -> None:
-    poll = Poll.query.get(poll_id)
+    #poll = Poll.query.get(poll_id)
+    poll = db.session.execute(db.select(Poll).where(Poll.id == poll_id)).scalar()
     if poll is None:
         raise PollNotFoundError()
 
-    active_poll = ActivePoll.query.first()
+    #active_poll = ActivePoll.query.first()
+    active_poll = db.session.execute(db.select(ActivePoll)).scalar()
     if active_poll is not None and active_poll.poll_id == poll_id:
         raise PollDeleteOpenError()
 
     # limpar votos associados com voto
-    Vote.query.filter(Vote.poll_id == poll_id).delete()
+    #Vote.query.filter(Vote.poll_id == poll_id).delete()
+    db.session.delete(
+        db.session.execute(db.select(Vote).where(Vote.poll_id == poll_id)).scalar()
+    )
 
     deleted_order = poll.order
     db.session.delete(poll)
@@ -241,11 +293,13 @@ def delete_poll(poll_id: str) -> None:
     db.session.commit()
 
 def open_poll(poll_id: str) -> None:
-    active_poll = ActivePoll.query.first()
+    #active_poll = ActivePoll.query.first()
+    active_poll = db.session.execute(db.select(ActivePoll)).scalar()
     if active_poll is not None:
         raise PollAlreadyOpenError()
     
-    poll = Poll.query.get(poll_id)
+    #poll = Poll.query.get(poll_id)
+    poll = db.session.execute(db.select(Poll).where(Poll.id == poll_id)).scalar()
     if poll is None:
         raise PollNotFoundError()
 
@@ -253,7 +307,10 @@ def open_poll(poll_id: str) -> None:
         raise VotingClosedError(True)
     elif poll.status == ESTADOS.index("2VOLTA"):
         # se for 2ª volta, limpar votos existentes
-        Vote.query.filter(Vote.poll_id == poll_id).delete()
+        #Vote.query.filter(Vote.poll_id == poll_id).delete()
+        db.session.delete(
+            db.session.execute(db.select(Vote).where(Vote.poll_id == poll_id)).scalar()
+        )
         db.session.commit()
 
     active_poll = ActivePoll(poll_id)
@@ -262,7 +319,8 @@ def open_poll(poll_id: str) -> None:
 
 
 def close_poll(poll_id: str) -> None:
-    active_poll = ActivePoll.query.first()
+    #active_poll = ActivePoll.query.first()
+    active_poll = db.session.execute(db.select(ActivePoll)).scalar()
     if active_poll is None:
         raise VotingPeriodError()
     
@@ -273,7 +331,8 @@ def close_poll(poll_id: str) -> None:
     db.session.commit()
 
 def count_votes(poll_id: str) -> Poll:
-    poll = Poll.query.get(poll_id)
+    #poll = Poll.query.get(poll_id)
+    poll = db.session.execute(db.select(Poll).where(Poll.id == poll_id)).scalar()
     if poll is None:
         raise PollNotFoundError()
 

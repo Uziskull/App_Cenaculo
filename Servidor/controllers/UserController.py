@@ -21,19 +21,22 @@ class UserAlreadyLoggedIn(UserError):
 # ----------------------------------------- #
 
 def get_token_for(email: str):
-    u = User.query.filter_by(email=email).first()
+    #u = User.query.filter_by(email=email).first()
+    u = db.session.execute(db.select(User).where(User.email == email)).scalar()
     if u is None:
         return None
     return u.token
 
 def is_login_valid(token: str, otp: str):
-    u = User.query.get(token)
+    #u = User.query.get(token)
+    u = db.session.execute(db.select(User).where(User.token == token)).scalar()
     if u is None:
         return False
     return u.otp == otp
 
 def store_login(token: str, otp: str):
-    u = User.query.get(token)
+    #u = User.query.get(token)
+    u = db.session.execute(db.select(User).where(User.token == token)).scalar()
     if u is None:
         raise UserNotFoundError()
     if u.otp is not None:
@@ -43,7 +46,8 @@ def store_login(token: str, otp: str):
     db.session.commit()
 
 def log_out(token: str, otp: str):
-    u = User.query.filter_by(token=token, otp=otp).first()
+    #u = User.query.filter_by(token=token, otp=otp).first()
+    u = db.session.execute(db.select(User).where(User.token == token).where(User.otp == otp)).scalar()
     if u is None:
         raise UserNotFoundError()
     u.otp = None
@@ -61,10 +65,12 @@ def insert_multiple_users(user_emails: Sequence[str]) -> List[User]:
     return new_users
 
 def get_all_users() -> List[User]:
-    return User.query.all()
+    #return User.query.all()
+    return db.session.execute(db.select(User)).scalars().all()
 
 def delete_user(user_token: str) -> None:
-    user = User.query.get(user_token)
+    #user = User.query.get(user_token)
+    user = db.session.execute(db.select(User).where(User.token == user_token)).scalar()
     if user is None:
         raise UserNotFoundError()
     
