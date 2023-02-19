@@ -112,7 +112,7 @@ def get_current_poll():
     if active_poll is None:
         return None
     #return Poll.query.get(active_poll.poll_id)
-    return db.session.execute(db.select(Poll).where(Poll.id == active_poll[0].poll_id)).scalar()
+    return db.session.execute(db.select(Poll).where(Poll.id == active_poll.poll_id)).scalar()
 
 def get_all_polls():
     #return Poll.query.order_by(Poll.order).all()
