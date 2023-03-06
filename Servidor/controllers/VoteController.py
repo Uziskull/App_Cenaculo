@@ -344,14 +344,16 @@ def count_votes(poll_id: str) -> Poll:
         if votes[i] > 0:
             # se já alguém votou
 
-            # técnica de votação: 50+1, caso não seja aprovada/reprovada vai a segunda volta sem abstenção
+            # técnica de votação:
+            # - 50%+1 a favor: aprovação
+            # - 50%+1 de abstenção OU número igual de votos a favor e contra: segunda volta (sem abstenção)
             # se status já for 2ª volta, é caso de empate em segunda volta: proposta reprovada
             final_votes = {VOTOS[i]:votes[i] for i in range(len(VOTOS))}
             poll_status = ESTADOS.index("REPROVADO")
             if poll.status != ESTADOS.index("2VOLTA"):
                 if final_votes["SIM"] > final_votes["NAO"] + final_votes["ABSTER"]:
                     poll_status = ESTADOS.index("APROVADO")
-                elif final_votes["ABSTER"] >= final_votes["NAO"]:
+                elif final_votes["ABSTER"] > final_votes["NAO"] + final_votes["SIM"] or final_votes["NAO"] == final_votes["SIM"]:
                     poll_status = ESTADOS.index("2VOLTA")
             elif final_votes["SIM"] > final_votes["NAO"]:
                 # em segunda volta, abstencoes não contam
@@ -365,3 +367,10 @@ def count_votes(poll_id: str) -> Poll:
     
     # não existem votos na proposta
     return None
+
+def delete_all_polls() -> None:
+    db.session.execute(db.delete(ActivePoll))
+    db.session.execute(db.delete(Vote))
+    db.session.execute(db.delete(Poll))
+    db.session.flush()
+    db.session.commit()

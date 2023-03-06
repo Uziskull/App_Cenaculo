@@ -96,6 +96,14 @@ def api_fechar_votos(poll_id):
     except Exception as e:
         return str(e), 404
 
+@api.route('/propostas', methods=["DELETE"])
+def api_apagar_propostas_e_votos():
+    try:
+        VoteController.delete_all_polls()
+        return "", 200
+    except Exception as e:
+        return str(e), 404
+
 # ---------------------------------
 
 @api.route('/utilizadores', methods=["GET"])
